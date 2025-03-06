@@ -1,0 +1,6 @@
+venv/
+.pgdata/
+.vscode/
+__pycache__/
+.env
+new_data_to_insert.sql

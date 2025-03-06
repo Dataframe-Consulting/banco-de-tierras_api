@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+gunicorn
+python-dotenv
+psycopg2-binary
+SQLAlchemy
+alembic
+fastapi-jwt-auth
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart

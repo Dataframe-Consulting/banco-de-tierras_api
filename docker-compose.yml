@@ -1,0 +1,42 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: banco_de_tierras_api
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+      - ENV=development
+      - SECRET_KEY=mysecretkey
+      - API_PREFIX=/api
+      - CORS_ORIGINS=http://localhost:3000,https://miaplicacion.com
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+
+  db:
+    image: postgres:16
+    container_name: banco_de_tierras_db
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      retries: 5
+      timeout: 5s
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  pgdata:

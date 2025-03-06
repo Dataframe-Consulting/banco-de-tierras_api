@@ -1,0 +1,27 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t tu-registry.azurecr.io/banco-de-tierras-api:latest -f Dockerfile .
+          docker push tu-registry.azurecr.io/banco-de-tierras-api:latest
+
+      - name: Deploy to Azure
+        run: |
+          az webapp create --resource-group tu-grupo --plan tu-plan --name tu-app --deployment-container-image-name tu-registry.azurecr.io/banco-de-tierras-api:latest
