@@ -1,27 +1,48 @@
-name: Deploy to Azure
+name: Deploy BDT Api to Azure App Service
 
 on:
   push:
     branches:
       - main
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
+env:
+  AZURE_REGISTRY_NAME: ${{ secrets.AZURE_REGISTRY_NAME }}
+  AZURE_WEBAPP_NAME: ${{ secrets.AZURE_WEBAPP_NAME }}
+  IMAGE_NAME: bdt-api
+  TAG: v1
 
-      - name: Log in to Azure
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Autenticación en Azure
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Build and Push Docker Image
+      - name: Iniciar sesión en Azure Container Registry
         run: |
-          docker build -t tu-registry.azurecr.io/banco-de-tierras-api:latest -f Dockerfile .
-          docker push tu-registry.azurecr.io/banco-de-tierras-api:latest
+          az acr login --name $AZURE_REGISTRY_NAME
 
-      - name: Deploy to Azure
+      - name: Construir y subir la imagen Docker
         run: |
-          az webapp create --resource-group tu-grupo --plan tu-plan --name tu-app --deployment-container-image-name tu-registry.azurecr.io/banco-de-tierras-api:latest
+          docker buildx build --platform linux/amd64 -t $AZURE_REGISTRY_NAME.azurecr.io/$IMAGE_NAME:$TAG .
+          docker push $AZURE_REGISTRY_NAME.azurecr.io/$IMAGE_NAME:$TAG
+
+      - name: Configurar la imagen en App Service
+        run: |
+          az webapp config container set \
+            --name $AZURE_WEBAPP_NAME \
+            --resource-group my-resource-group \
+            --docker-custom-image-name $AZURE_REGISTRY_NAME.azurecr.io/$IMAGE_NAME:$TAG \
+            --docker-registry-server-url https://$AZURE_REGISTRY_NAME.azurecr.io
+
+      - name: Reiniciar la aplicación
+        run: |
+          az webapp restart --name $AZURE_WEBAPP_NAME --resource-group my-resource-group
