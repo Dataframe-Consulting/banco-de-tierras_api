@@ -1,4 +1,4 @@
-name: Deploy FastAPI to Azure App Service
+name: Deploy BDT Api to Azure App Service
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
 env:
   AZURE_REGISTRY_NAME: ${{ secrets.AZURE_REGISTRY_NAME }}
   AZURE_WEBAPP_NAME: ${{ secrets.AZURE_WEBAPP_NAME }}
-  IMAGE_NAME: fastapi-app
-  TAG: latest
+  IMAGE_NAME: bdt-api
+  TAG: v1
 
 jobs:
   build-and-deploy:
@@ -32,17 +32,17 @@ jobs:
 
       - name: Construir y subir la imagen Docker
         run: |
-          docker build -t $AZURE_REGISTRY_NAME.azurecr.io/$IMAGE_NAME:$TAG .
+          docker buildx build --platform linux/amd64 -t $AZURE_REGISTRY_NAME.azurecr.io/$IMAGE_NAME:$TAG .
           docker push $AZURE_REGISTRY_NAME.azurecr.io/$IMAGE_NAME:$TAG
 
       - name: Configurar la imagen en App Service
         run: |
           az webapp config container set \
             --name $AZURE_WEBAPP_NAME \
-            --resource-group <nombre-del-grupo> \
+            --resource-group my-resource-group \
             --docker-custom-image-name $AZURE_REGISTRY_NAME.azurecr.io/$IMAGE_NAME:$TAG \
             --docker-registry-server-url https://$AZURE_REGISTRY_NAME.azurecr.io
 
       - name: Reiniciar la aplicación
         run: |
-          az webapp restart --name $AZURE_WEBAPP_NAME --resource-group <nombre-del-grupo>
+          az webapp restart --name $AZURE_WEBAPP_NAME --resource-group my-resource-group
