@@ -28,7 +28,7 @@ app.add_middleware(
 
 @app.get(f"{settings.API_PREFIX}/health")
 def health_check():
-    return {"status": "ok"}
+    return {"status": "ok updated with CICD"}
 
 Base.metadata.create_all(bind=engine)
 
