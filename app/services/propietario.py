@@ -5,6 +5,9 @@ from app.schemas.propietario import PropietarioCreate
 from app.schemas.socio import SocioCreate
 import math
 
+def get_all_propietarios_without_pagination(db: Session):
+    return db.query(Propietario).all()
+
 def get_all_propietarios(db: Session, page: int = 1, page_size: int = 10):
     query = db.query(Propietario)
     total = query.count()

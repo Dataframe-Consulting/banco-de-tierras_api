@@ -3,6 +3,9 @@ from app.models.sociedad import Sociedad
 from app.schemas.sociedad import SociedadCreate
 import math
 
+def get_all_sociedades_without_pagination(db: Session):
+    return db.query(Sociedad).all()
+
 def get_all_sociedades(db: Session, page: int = 1, page_size: int = 10):
     query = db.query(Sociedad)
     total = query.count()
