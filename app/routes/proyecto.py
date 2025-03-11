@@ -1,7 +1,7 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.config.database import get_db
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from app.schemas.proyecto import ProyectoCreate, ProyectoResponse, PaginatedProyectosResponse
 from app.services.proyecto import get_all_proyectos, get_all_proyectos_without_pagination, get_proyecto_by_id, get_proyecto_by_nombre, create_proyecto, add_propietario_to_proyecto, remove_propietario_from_proyecto, add_sociedad_to_proyecto, check_sociedad_in_proyecto, remove_sociedad_from_proyecto, update_proyecto, delete_proyecto
 from app.services.situacion_fisica import get_situacion_fisica_by_id
@@ -17,8 +17,16 @@ router = APIRouter(prefix="/proyecto", tags=["Proyectos"])
 #     return get_all_proyectos(db, page, page_size)
 
 @router.get("/", response_model=List[ProyectoResponse])
-def get_proyectos(db: Session = Depends(get_db)):
-    return get_all_proyectos_without_pagination(db)
+def get_proyectos(
+    db: Session = Depends(get_db),
+    q: Optional[str] = Query(None, description="Busca por nombre..."),
+    propietario_id: Optional[int] = Query(None, description="Filtrar por ID de propietario"),
+    situacion_fisica_id: Optional[int] = Query(None, description="Filtrar por ID de situación física"),
+    sociedad_id: Optional[int] = Query(None, description="Filtrar por ID de sociedad"),
+    vocacion_id: Optional[int] = Query(None, description="Filtrar por ID de vocación"),
+    vocacion_especifica_id: Optional[int] = Query(None, description="Filtrar por ID de vocación específica")
+):
+    return get_all_proyectos_without_pagination(db, q, propietario_id, situacion_fisica_id, sociedad_id, vocacion_id, vocacion_especifica_id)
 
 @router.get("/{proyecto_id}", response_model=ProyectoResponse)
 def get_proyecto(proyecto_id: int, db: Session = Depends(get_db)):

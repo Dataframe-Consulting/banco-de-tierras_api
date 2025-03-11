@@ -3,6 +3,21 @@ from app.models.proceso_legal import ProcesoLegal
 from app.schemas.proceso_legal import ProcesoLegalCreate
 import math
 
+def get_all_procesos_legales_without_pagination(
+    db: Session,
+    q: str = None,
+    propiedad_id: int = None
+):
+    query = db.query(ProcesoLegal)
+
+    if(q):
+        query = query.filter(ProcesoLegal.abogado.ilike(f"%{q}%"))
+
+    if(propiedad_id):
+        query = query.filter(ProcesoLegal.propiedad_id == propiedad_id)
+
+    return query.all()
+
 def get_all_procesos_legales(db: Session, page: int = 1, page_size: int = 10):
     query = db.query(ProcesoLegal)
     total = query.count()

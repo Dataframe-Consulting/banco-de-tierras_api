@@ -3,6 +3,21 @@ from app.models.garantia import Garantia
 from sqlalchemy.orm import Session, joinedload
 from app.schemas.garantia import GarantiaCreate
 
+def get_all_garantias_without_pagination(
+    db: Session,
+    q: str = None,
+    propiedad_id: int = None
+):
+    query = db.query(Garantia)
+
+    if(q):
+        query = query.filter(Garantia.beneficiario.ilike(f"%{q}%"))
+
+    if(propiedad_id):
+        query = query.filter(Garantia.propiedad_id == propiedad_id)
+
+    return query.all()
+
 def get_all_garantias(db: Session, page: int = 1, page_size: int = 10):
     query = db.query(Garantia)
     total = query.count()
