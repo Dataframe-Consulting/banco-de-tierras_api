@@ -1,5 +1,5 @@
 venv/
-.pgdata/
+pgdata/
 .vscode/
 __pycache__/
 .env
