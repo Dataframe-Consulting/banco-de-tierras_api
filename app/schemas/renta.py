@@ -7,15 +7,13 @@ class RentaBase(BaseModel):
     nombre_comercial: str
     razon_social: str
     renta_sin_iva: float
-    deposito_garantia_concepto: Optional[str] = None
-    deposito_garantia_monto: Optional[float] = None
-    meses_gracia_concepto: Optional[str] = None
+    meses_deposito_garantia: int
+    meses_gracia: int
     meses_gracia_fecha_inicio: Optional[datetime] = None
     meses_gracia_fecha_fin: Optional[datetime] = None
-    renta_anticipada_concepto: Optional[str] = None
+    meses_renta_anticipada: int
     renta_anticipada_fecha_inicio: Optional[datetime] = None
     renta_anticipada_fecha_fin: Optional[datetime] = None
-    renta_anticipada_renta_sin_iva: Optional[float] = None
     incremento_mes: str
     incremento_nota: Optional[str] = None
     inicio_vigencia: datetime

@@ -6,15 +6,11 @@ from app.schemas.garantia import GarantiaCreate
 def get_all_garantias_without_pagination(
     db: Session,
     q: str = None,
-    propiedad_id: int = None
 ):
     query = db.query(Garantia)
 
     if(q):
         query = query.filter(Garantia.beneficiario.ilike(f"%{q}%"))
-
-    if(propiedad_id):
-        query = query.filter(Garantia.propiedad_id == propiedad_id)
 
     return query.all()
 
@@ -50,9 +46,7 @@ def update_garantia(db: Session, garantia_id: int, garantia: GarantiaCreate):
     return db.query(Garantia).filter(Garantia.id == garantia_id).first()
 
 def delete_garantia(db: Session, garantia_id: int):
-    garantia = db.query(Garantia).options(
-        joinedload(Garantia.propiedad)
-    ).filter(Garantia.id == garantia_id).first()
+    garantia = db.query(Garantia).filter(Garantia.id == garantia_id).first()
     if garantia:
         db.delete(garantia)
         db.commit()

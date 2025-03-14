@@ -9,16 +9,16 @@ propietario_proyecto = Table(
     Column("proyecto_id", ForeignKey("proyecto.id", ondelete="CASCADE"), primary_key=True)
 )
 
-class SociedadProyecto(Base):
-    __tablename__ = "sociedad_proyecto"
+# class SociedadProyecto(Base):
+#     __tablename__ = "sociedad_proyecto"
 
-    sociedad_id = Column(Integer, ForeignKey("sociedad.id", ondelete="CASCADE"), primary_key=True)
-    proyecto_id = Column(Integer, ForeignKey("proyecto.id", ondelete="CASCADE"), primary_key=True)
-    valor = Column(Float, nullable=False)
-    created_at = Column(TIMESTAMP, server_default=func.now())
+#     sociedad_id = Column(Integer, ForeignKey("sociedad.id", ondelete="CASCADE"), primary_key=True)
+#     proyecto_id = Column(Integer, ForeignKey("proyecto.id", ondelete="CASCADE"), primary_key=True)
+#     valor = Column(Float, nullable=False)
+#     created_at = Column(TIMESTAMP, server_default=func.now())
 
-    sociedad = relationship("Sociedad", back_populates="proyectos")
-    proyecto = relationship("Proyecto", back_populates="sociedades")
+#     sociedad = relationship("Sociedad", back_populates="proyectos")
+#     proyecto = relationship("Proyecto", back_populates="sociedades")
 
 class Proyecto(Base):
     __tablename__ = "proyecto"
@@ -39,5 +39,5 @@ class Proyecto(Base):
     vocacion_especifica = relationship("VocacionEspecifica", back_populates="proyectos")
 
     propietarios = relationship("Propietario", secondary=propietario_proyecto, back_populates="proyectos")
-    sociedades = relationship("SociedadProyecto", back_populates="proyecto")
+    # sociedades = relationship("SociedadProyecto", back_populates="proyecto")
     propiedades = relationship("Propiedad", back_populates="proyecto")

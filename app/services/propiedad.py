@@ -1,14 +1,20 @@
 from sqlalchemy.orm import Session, joinedload
 from app.models.propiedad import Propiedad
 from app.schemas.propiedad import PropiedadCreate
+from app.models.sociedad import Sociedad
 from app.models.ubicacion import Ubicacion
+from app.models.garantia import Garantia
+from app.models.proceso_legal import ProcesoLegal
 import math
 
 def get_all_propiedades_without_pagination(
     db: Session,
     q: str = None,
     proyecto_id: int = None,
-    ubicacion_id: int = None
+    sociedad_id: int = None,
+    ubicacion_id: int = None,
+    garantia_id: int = None,
+    proceso_legal_id: int = None
 ):
     query = db.query(Propiedad)
 
@@ -18,8 +24,17 @@ def get_all_propiedades_without_pagination(
     if proyecto_id:
         query = query.filter(Propiedad.proyecto_id == proyecto_id)
 
+    if sociedad_id:
+        query = query.join(Propiedad.sociedades).filter(Sociedad.id == sociedad_id)
+
     if ubicacion_id:
         query = query.join(Propiedad.ubicaciones).filter(Ubicacion.id == ubicacion_id)
+
+    if garantia_id:
+        query = query.join(Propiedad.garantias).filter(Garantia.id == garantia_id)
+
+    if proceso_legal_id:
+        query = query.join(Propiedad.procesos_legales).filter(ProcesoLegal.id == proceso_legal_id)
 
     return query.all()
 
@@ -55,6 +70,22 @@ def create_propiedad(db: Session, propiedad: PropiedadCreate):
     db.refresh(new_propiedad)
     return new_propiedad
 
+def add_sociedad_to_propiedad(db: Session, propiedad_id: int, sociedad_id: int):
+    propiedad = db.query(Propiedad).filter(Propiedad.id == propiedad_id).first()
+    sociedad = db.query(Sociedad).filter(Sociedad.id == sociedad_id).first()
+    propiedad.sociedades.append(sociedad)
+    db.commit()
+    db.refresh(propiedad)
+    return propiedad
+
+def remove_sociedad_from_propiedad(db: Session, propiedad_id: int, sociedad_id: int):
+    propiedad = db.query(Propiedad).filter(Propiedad.id == propiedad_id).first()
+    sociedad = db.query(Sociedad).filter(Sociedad.id == sociedad_id).first()
+    propiedad.sociedades.remove(sociedad)
+    db.commit()
+    db.refresh(propiedad)
+    return propiedad
+
 def add_ubicacion_to_propiedad(db: Session, propiedad_id: int, ubicacion_id: int):
     propiedad = db.query(Propiedad).filter(Propiedad.id == propiedad_id).first()
     ubicacion = db.query(Ubicacion).filter(Ubicacion.id == ubicacion_id).first()
@@ -67,6 +98,38 @@ def remove_ubicacion_from_propiedad(db: Session, propiedad_id: int, ubicacion_id
     propiedad = db.query(Propiedad).filter(Propiedad.id == propiedad_id).first()
     ubicacion = db.query(Ubicacion).filter(Ubicacion.id == ubicacion_id).first()
     propiedad.ubicaciones.remove(ubicacion)
+    db.commit()
+    db.refresh(propiedad)
+    return propiedad
+
+def add_garantia_to_propiedad(db: Session, propiedad_id: int, garantia_id: int):
+    propiedad = db.query(Propiedad).filter(Propiedad.id == propiedad_id).first()
+    garantia = db.query(Garantia).filter(Garantia.id == garantia_id).first()
+    propiedad.garantias.append(garantia)
+    db.commit()
+    db.refresh(propiedad)
+    return propiedad
+
+def remove_garantia_from_propiedad(db: Session, propiedad_id: int, garantia_id: int):
+    propiedad = db.query(Propiedad).filter(Propiedad.id == propiedad_id).first()
+    garantia = db.query(Garantia).filter(Garantia.id == garantia_id).first()
+    propiedad.garantias.remove(garantia)
+    db.commit()
+    db.refresh(propiedad)
+    return propiedad
+
+def add_proceso_legal_to_propiedad(db: Session, propiedad_id: int, proceso_legal_id: int):
+    propiedad = db.query(Propiedad).filter(Propiedad.id == propiedad_id).first()
+    proceso_legal = db.query(ProcesoLegal).filter(ProcesoLegal.id == proceso_legal_id).first()
+    propiedad.procesos_legales.append(proceso_legal)
+    db.commit()
+    db.refresh(propiedad)
+    return propiedad
+
+def remove_proceso_legal_from_propiedad(db: Session, propiedad_id: int, proceso_legal_id: int):
+    propiedad = db.query(Propiedad).filter(Propiedad.id == propiedad_id).first()
+    proceso_legal = db.query(ProcesoLegal).filter(ProcesoLegal.id == proceso_legal_id).first()
+    propiedad.procesos_legales.remove(proceso_legal)
     db.commit()
     db.refresh(propiedad)
     return propiedad

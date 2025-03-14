@@ -6,15 +6,11 @@ import math
 def get_all_procesos_legales_without_pagination(
     db: Session,
     q: str = None,
-    propiedad_id: int = None
 ):
     query = db.query(ProcesoLegal)
 
     if(q):
         query = query.filter(ProcesoLegal.abogado.ilike(f"%{q}%"))
-
-    if(propiedad_id):
-        query = query.filter(ProcesoLegal.propiedad_id == propiedad_id)
 
     return query.all()
 
@@ -50,9 +46,7 @@ def update_proceso_legal(db: Session, proceso_legal_id: int, proceso_legal: Proc
     return db.query(ProcesoLegal).filter(ProcesoLegal.id == proceso_legal_id).first()
 
 def delete_proceso_legal(db: Session, proceso_legal_id: int):
-    proceso_legal = db.query(ProcesoLegal).options(
-        joinedload(ProcesoLegal.propiedad)
-    ).filter(ProcesoLegal.id == proceso_legal_id).first()
+    proceso_legal = db.query(ProcesoLegal).filter(ProcesoLegal.id == proceso_legal_id).first()
     if proceso_legal:
         db.delete(proceso_legal)
         db.commit()

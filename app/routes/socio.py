@@ -1,14 +1,21 @@
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.config.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
 from app.schemas.socio import SocioCreate, SocioResponse, PaginatedSociosResponse
-from app.services.socio import get_all_socios, get_socio_by_id, create_socio, update_socio, delete_socio
+from app.services.socio import get_all_socios, get_all_socios_without_pagination, get_socio_by_id, create_socio, update_socio, delete_socio
 
 router = APIRouter(prefix="/socio", tags=["Socios"])
 
-@router.get("/", response_model=PaginatedSociosResponse)
-def get_socios(page: int = 1, page_size: int = 10, db: Session = Depends(get_db)):
-    return get_all_socios(db, page, page_size)
+# WITH PAGINATION
+# @router.get("/", response_model=PaginatedSociosResponse)
+# def get_socios(page: int = 1, page_size: int = 10, db: Session = Depends(get_db)):
+#     return get_all_socios(db, page, page_size)
+
+# WITHOUT PAGINATION
+@router.get("/", response_model=List[SocioResponse])
+def get_socios(db: Session = Depends(get_db)):
+    return get_all_socios_without_pagination(db)
 
 @router.get("/{socio_id}", response_model=SocioResponse)
 def get_socio(socio_id: int, db: Session = Depends(get_db)):

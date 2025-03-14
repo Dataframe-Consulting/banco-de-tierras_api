@@ -5,22 +5,22 @@ from .situacion_fisica import SituacionFisicaResponse
 from .vocacion import VocacionResponse
 from .vocacion_especifica import VocacionEspecificaResponse
 from .propietario import PropietarioResponse
-from .sociedad import SociedadResponse
+# from .sociedad import SociedadResponse
 
-class SociedadProyectoBase(BaseModel):
-    valor: float
+# class SociedadProyectoBase(BaseModel):
+#     valor: float
 
-class SociedadProyectoCreate(SociedadProyectoBase):
-    pass
+# class SociedadProyectoCreate(SociedadProyectoBase):
+#     pass
 
-class SociedadProyectoResponse(SociedadProyectoBase):
-    sociedad_id: int
-    proyecto_id: int
-    sociedad: SociedadResponse
-    created_at: datetime
+# class SociedadProyectoResponse(SociedadProyectoBase):
+#     sociedad_id: int
+#     proyecto_id: int
+#     sociedad: SociedadResponse
+#     created_at: datetime
 
-    class Config:
-        from_attributes = True
+#     class Config:
+#         from_attributes = True
 
 class ProyectoBase(BaseModel):
     nombre: str
@@ -40,7 +40,7 @@ class ProyectoResponse(ProyectoBase):
     vocacion: VocacionResponse
     vocacion_especifica: VocacionEspecificaResponse
     propietarios: List[PropietarioResponse] = []
-    sociedades: List[SociedadProyectoResponse] = []
+    # sociedades: List[SociedadProyectoResponse] = []
     created_at: datetime
     updated_at: datetime
 
