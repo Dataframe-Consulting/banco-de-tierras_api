@@ -57,9 +57,6 @@ def add_sociedad_to_some_propiedad(propiedad_id: int, sociedad_id: int, db: Sess
     db_sociedad = get_sociedad_by_id(db, sociedad_id)
     if not db_sociedad:
         raise HTTPException(status_code=404, detail="Sociedad no encontrada")
-    sociedad_already_added = any(db_sociedad.id == sociedad.id for sociedad in db_propiedad.sociedades)
-    if sociedad_already_added:
-        raise HTTPException(status_code=400, detail="Sociedad ya agregada a la propiedad")
     return add_sociedad_to_propiedad(db, propiedad_id, sociedad_id)
 
 @router.delete("/{propiedad_id}/sociedad/{sociedad_id}", response_model=PropiedadResponse)
