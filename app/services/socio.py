@@ -3,6 +3,9 @@ from app.models.socio import Socio
 from app.schemas.socio import SocioCreate
 import math
 
+def get_all_socios_without_pagination(db: Session):
+    return db.query(Socio).all()
+
 def get_all_socios(db: Session, page: int = 1, page_size: int = 10):
     query = db.query(Socio)
     total = query.count()

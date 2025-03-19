@@ -2,7 +2,10 @@ from datetime import datetime
 from pydantic import BaseModel
 from typing import List, Optional
 from .proyecto import ProyectoResponse
+from .sociedad import SociedadResponse
 from .ubicacion import UbicacionResponse
+from .garantia import GarantiaResponse
+from .proceso_legal import ProcesoLegalResponse
 
 class PropiedadBase(BaseModel):
     nombre: str
@@ -22,7 +25,10 @@ class PropiedadCreate(PropiedadBase):
 class PropiedadResponse(PropiedadBase):
     id: int
     proyecto: ProyectoResponse
+    sociedades: List[SociedadResponse] = []
     ubicaciones: List[UbicacionResponse] = []
+    garantias: List[GarantiaResponse] = []
+    procesos_legales: List[ProcesoLegalResponse] = []
     created_at: datetime
     updated_at: datetime
 

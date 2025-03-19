@@ -9,15 +9,15 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 router = APIRouter(prefix="/auth", tags=["Auth"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
-@router.post("/register")
-def register(user: UserCreate, db: Session = Depends(get_db)):
-    existing_user_by_username = get_user_by_username(db, user.username)
-    if existing_user_by_username:
-        raise HTTPException(status_code=400, detail="El usuario ya existe")
-    existing_user_by_email = get_user_by_email(db, user.email)
-    if existing_user_by_email:
-        raise HTTPException(status_code=400, detail="El email ya existe")
-    return create_user(db, user)
+# @router.post("/register")
+# def register(user: UserCreate, db: Session = Depends(get_db)):
+#     existing_user_by_username = get_user_by_username(db, user.username)
+#     if existing_user_by_username:
+#         raise HTTPException(status_code=400, detail="El usuario ya existe")
+#     existing_user_by_email = get_user_by_email(db, user.email)
+#     if existing_user_by_email:
+#         raise HTTPException(status_code=400, detail="El email ya existe")
+#     return create_user(db, user)
 
 @router.post("/login")
 def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):

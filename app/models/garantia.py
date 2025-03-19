@@ -1,6 +1,7 @@
 from app.config.database import Base
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, Float, Boolean, String, Text, Date, TIMESTAMP, func, Table, ForeignKey
+from app.models.propiedad import garantia_propiedad
 
 class Garantia(Base):
     __tablename__ = "garantia"
@@ -10,8 +11,7 @@ class Garantia(Base):
     monto = Column(Float, nullable=False)
     fecha_inicio = Column(Date, nullable=False)
     fecha_fin = Column(Date, nullable=False)
-    propiedad_id = Column(Integer, ForeignKey("propiedad.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    propiedad = relationship("Propiedad", back_populates="garantias")
+    propiedades = relationship("Propiedad", secondary=garantia_propiedad, back_populates="garantias")

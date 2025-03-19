@@ -3,6 +3,9 @@ from app.models.situacion_fisica import SituacionFisica
 from app.schemas.situacion_fisica import SituacionFisicaCreate
 import math
 
+def get_all_situaciones_fisicas_without_pagination(db: Session):
+    return db.query(SituacionFisica).all()
+
 def get_all_situaciones_fisicas(db: Session, page: int = 1, page_size: int = 10):
     query = db.query(SituacionFisica)
     total = query.count()

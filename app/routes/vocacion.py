@@ -1,14 +1,21 @@
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.config.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
 from app.schemas.vocacion import VocacionCreate, VocacionResponse, PaginatedVocacionesResponse
-from app.services.vocacion import get_all_vocaciones, get_vocacion_by_id, get_vocacion_by_valor, create_vocacion, update_vocacion, delete_vocacion
+from app.services.vocacion import get_all_vocaciones, get_all_vocaciones_without_pagination, get_vocacion_by_id, get_vocacion_by_valor, create_vocacion, update_vocacion, delete_vocacion
 
 router = APIRouter(prefix="/vocacion", tags=["Vocaciones"])
 
-@router.get("/", response_model=PaginatedVocacionesResponse)
-def get_vocaciones(page: int = 1, page_size: int = 10, db: Session = Depends(get_db)):
-    return get_all_vocaciones(db, page, page_size)
+# WITH PAGINATION
+# @router.get("/", response_model=PaginatedVocacionesResponse)
+# def get_vocaciones(page: int = 1, page_size: int = 10, db: Session = Depends(get_db)):
+#     return get_all_vocaciones(db, page, page_size)
+
+# WITHOUT PAGINATION
+@router.get("/", response_model=List[VocacionResponse])
+def get_vocaciones(db: Session = Depends(get_db)):
+    return get_all_vocaciones_without_pagination(db)
 
 @router.get("/{vocacion_id}", response_model=VocacionResponse)
 def get_vocacion(vocacion_id: int, db: Session = Depends(get_db)):

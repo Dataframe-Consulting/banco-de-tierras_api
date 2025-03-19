@@ -1,20 +1,18 @@
 from datetime import datetime
 from pydantic import BaseModel
-from typing import List
-from .propiedad import PropiedadResponse
+from typing import List, Optional
 
 class ProcesoLegalBase(BaseModel):
     abogado: str
     tipo_proceso: str
     estatus: str
-    propiedad_id: int
+    comentarios: Optional[str] = None
 
 class ProcesoLegalCreate(ProcesoLegalBase):
     pass
 
 class ProcesoLegalResponse(ProcesoLegalBase):
     id: int
-    propiedad: PropiedadResponse
     created_at: datetime
     updated_at: datetime
 

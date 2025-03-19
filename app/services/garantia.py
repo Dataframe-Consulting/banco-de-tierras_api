@@ -3,6 +3,17 @@ from app.models.garantia import Garantia
 from sqlalchemy.orm import Session, joinedload
 from app.schemas.garantia import GarantiaCreate
 
+def get_all_garantias_without_pagination(
+    db: Session,
+    q: str = None,
+):
+    query = db.query(Garantia)
+
+    if(q):
+        query = query.filter(Garantia.beneficiario.ilike(f"%{q}%"))
+
+    return query.all()
+
 def get_all_garantias(db: Session, page: int = 1, page_size: int = 10):
     query = db.query(Garantia)
     total = query.count()
@@ -35,9 +46,7 @@ def update_garantia(db: Session, garantia_id: int, garantia: GarantiaCreate):
     return db.query(Garantia).filter(Garantia.id == garantia_id).first()
 
 def delete_garantia(db: Session, garantia_id: int):
-    garantia = db.query(Garantia).options(
-        joinedload(Garantia.propiedad)
-    ).filter(Garantia.id == garantia_id).first()
+    garantia = db.query(Garantia).filter(Garantia.id == garantia_id).first()
     if garantia:
         db.delete(garantia)
         db.commit()

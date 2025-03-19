@@ -1,15 +1,22 @@
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.config.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
 from app.schemas.propietario import PropietarioCreate, PropietarioResponse, PaginatedPropietariosResponse
-from app.services.propietario import get_all_propietarios, get_propietario_by_id, get_propietario_by_rfc, create_propietario, add_socio_to_propietario, update_propietario, delete_propietario, remove_socio_from_propietario
+from app.services.propietario import get_all_propietarios, get_all_propietarios_without_pagination, get_propietario_by_id, get_propietario_by_rfc, create_propietario, add_socio_to_propietario, update_propietario, delete_propietario, remove_socio_from_propietario
 from app.services.socio import get_socio_by_id
 
 router = APIRouter(prefix="/propietario", tags=["Propietarios"])
 
-@router.get("/", response_model=PaginatedPropietariosResponse)
-def get_propietarios(page: int = 1, page_size: int = 10, db: Session = Depends(get_db)):
-    return get_all_propietarios(db, page, page_size)
+# WITH PAGINATION
+# @router.get("/", response_model=PaginatedPropietariosResponse)
+# def get_propietarios(page: int = 1, page_size: int = 10, db: Session = Depends(get_db)):
+#     return get_all_propietarios(db, page, page_size)
+
+# WITHOUT PAGINATION
+@router.get("/", response_model=List[PropietarioResponse])
+def get_propietarios(db: Session = Depends(get_db)):
+    return get_all_propietarios_without_pagination(db)
 
 @router.get("/{propietario_id}", response_model=PropietarioResponse)
 def get_propietario(propietario_id: int, db: Session = Depends(get_db)):

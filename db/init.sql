@@ -1,5 +1,5 @@
 -- TABLES
-CREATE TABLE IF NOT EXISTS user (
+CREATE TABLE IF NOT EXISTS "user" (
     id SERIAL PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -25,13 +25,6 @@ CREATE TABLE IF NOT EXISTS propietario_socio (
     socio_id INT NOT NULL REFERENCES socio(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (propietario_id, socio_id)
-);
-CREATE TABLE IF NOT EXISTS sociedad (
-    id SERIAL PRIMARY KEY,
-    -- 12.50, 20, 45, 100
-    porcentaje_participacion DECIMAL(5, 2) NOT NULL UNIQUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE IF NOT EXISTS situacion_fisica (
     id SERIAL PRIMARY KEY,
@@ -72,16 +65,34 @@ CREATE TABLE IF NOT EXISTS propietario_proyecto (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (propietario_id, proyecto_id)
 );
-CREATE TABLE IF NOT EXISTS sociedad_proyecto (
-    valor DECIMAL(20, 2) NOT NULL,
-    sociedad_id INT NOT NULL REFERENCES sociedad(id) ON DELETE CASCADE,
-    proyecto_id INT NOT NULL REFERENCES proyecto(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS sociedad (
+    id SERIAL PRIMARY KEY,
+    -- 12.50, 20, 45, 100
+    porcentaje_participacion DECIMAL(5, 2) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (sociedad_id, proyecto_id)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE IF NOT EXISTS ubicacion (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS garantia (
+    id SERIAL PRIMARY KEY,
+    beneficiario VARCHAR(255) NOT NULL,
+    monto FLOAT NOT NULL,
+    fecha_inicio DATE NOT NULL,
+    fecha_fin DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS proceso_legal (
+    id SERIAL PRIMARY KEY,
+    abogado VARCHAR(255) NOT NULL,
+    tipo_proceso VARCHAR(255) NOT NULL,
+    estatus VARCHAR(255) NOT NULL,
+    comentarios TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -100,45 +111,43 @@ CREATE TABLE IF NOT EXISTS propiedad (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE IF NOT EXISTS sociedad_propiedad (
+    sociedad_id INT NOT NULL REFERENCES sociedad(id) ON DELETE CASCADE,
+    propiedad_id INT NOT NULL REFERENCES propiedad(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 CREATE TABLE IF NOT EXISTS ubicacion_propiedad (
     ubicacion_id INT NOT NULL REFERENCES ubicacion(id) ON DELETE CASCADE,
     propiedad_id INT NOT NULL REFERENCES propiedad(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (ubicacion_id, propiedad_id)
 );
-CREATE TABLE IF NOT EXISTS garantia (
-    id SERIAL PRIMARY KEY,
-    beneficiario VARCHAR(255) NOT NULL,
-    monto FLOAT NOT NULL,
-    fecha_inicio DATE NOT NULL,
-    fecha_fin DATE NOT NULL,
+CREATE TABLE IF NOT EXISTS garantia_propiedad (
+    garantia_id INT NOT NULL REFERENCES garantia(id) ON DELETE CASCADE,
     propiedad_id INT NOT NULL REFERENCES propiedad(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    PRIMARY KEY (garantia_id, propiedad_id)
 );
-CREATE TABLE IF NOT EXISTS proceso_legal (
-    id SERIAL PRIMARY KEY,
-    abogado VARCHAR(255) NOT NULL,
-    tipo_proceso VARCHAR(255) NOT NULL,
-    estatus VARCHAR(255) NOT NULL,
+CREATE TABLE IF NOT EXISTS proceso_legal_propiedad (
+    proceso_legal_id INT NOT NULL REFERENCES proceso_legal(id) ON DELETE CASCADE,
     propiedad_id INT NOT NULL REFERENCES propiedad(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    PRIMARY KEY (proceso_legal_id, propiedad_id)
 );
 CREATE TABLE IF NOT EXISTS renta(
     id SERIAL PRIMARY KEY,
     nombre_comercial VARCHAR(255) NOT NULL,
     razon_social VARCHAR(255) NOT NULL,
     renta_sin_iva DECIMAL(10, 2) NOT NULL,
-    deposito_garantia_concepto VARCHAR(255),
-    deposito_garantia_monto DECIMAL(10, 2),
-    meses_gracia_concepto VARCHAR(255),
+    meses_deposito_garantia INT NOT NULL,
+    -- deposito_garantia_monto DECIMAL(10, 2), SE CALCULA (renta_sin_iva * meses_deposito_garantia)
+    meses_gracia INT NOT NULL,
     meses_gracia_fecha_inicio DATE,
     meses_gracia_fecha_fin DATE,
-    renta_anticipada_concepto VARCHAR(255),
+    meses_renta_anticipada INT NOT NULL,
     renta_anticipada_fecha_inicio DATE,
     renta_anticipada_fecha_fin DATE,
-    renta_anticipada_renta_sin_iva FLOAT,
+    -- renta_anticipada_renta_sin_iva FLOAT, SE CALCULA (renta_sin_iva * meses_renta_anticipada)
     incremento_mes VARCHAR(255) NOT NULL,
     incremento_nota VARCHAR(255),
     inicio_vigencia DATE NOT NULL,
@@ -159,10 +168,12 @@ CREATE INDEX IF NOT EXISTS idx_propietario_socio ON propietario_socio(propietari
 CREATE INDEX IF NOT EXISTS idx_socio_propietario ON propietario_socio(socio_id, propietario_id);
 CREATE INDEX IF NOT EXISTS idx_propietario_proyecto ON propietario_proyecto(propietario_id, proyecto_id);
 CREATE INDEX IF NOT EXISTS idx_proyecto_propietario ON propietario_proyecto(proyecto_id, propietario_id);
-CREATE INDEX IF NOT EXISTS idx_sociedad_proyecto ON sociedad_proyecto(sociedad_id, proyecto_id);
-CREATE INDEX IF NOT EXISTS idx_proyecto_sociedad ON sociedad_proyecto(proyecto_id, sociedad_id);
 CREATE INDEX IF NOT EXISTS idx_ubicacion_propiedad ON ubicacion_propiedad(ubicacion_id, propiedad_id);
 CREATE INDEX IF NOT EXISTS idx_propiedad_ubicacion ON ubicacion_propiedad(propiedad_id, ubicacion_id);
+CREATE INDEX IF NOT EXISTS idx_garantia_propiedad ON garantia_propiedad(garantia_id, propiedad_id);
+CREATE INDEX IF NOT EXISTS idx_propiedad_garantia ON garantia_propiedad(propiedad_id, garantia_id);
+CREATE INDEX IF NOT EXISTS idx_proceso_legal_propiedad ON proceso_legal_propiedad(proceso_legal_id, propiedad_id);
+CREATE INDEX IF NOT EXISTS idx_propiedad_proceso_legal ON proceso_legal_propiedad(propiedad_id, proceso_legal_id);
 CREATE INDEX IF NOT EXISTS idx_propiedad_renta ON propiedad_renta(propiedad_id, renta_id);
 CREATE INDEX IF NOT EXISTS idx_renta_propiedad ON propiedad_renta(renta_id, propiedad_id);
 -- TRIGGERS
@@ -172,27 +183,25 @@ END IF;
 RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS set_updated_at ON user;
+DROP TRIGGER IF EXISTS set_updated_at ON "user";
 DROP TRIGGER IF EXISTS set_updated_at ON propietario;
 DROP TRIGGER IF EXISTS set_updated_at ON socio;
-DROP TRIGGER IF EXISTS set_updated_at ON sociedad;
 DROP TRIGGER IF EXISTS set_updated_at ON situacion_fisica;
 DROP TRIGGER IF EXISTS set_updated_at ON vocacion;
 DROP TRIGGER IF EXISTS set_updated_at ON vocacion_especifica;
 DROP TRIGGER IF EXISTS set_updated_at ON proyecto;
+DROP TRIGGER IF EXISTS set_updated_at ON sociedad;
 DROP TRIGGER IF EXISTS set_updated_at ON ubicacion;
-DROP TRIGGER IF EXISTS set_updated_at ON propiedad;
 DROP TRIGGER IF EXISTS set_updated_at ON garantia;
 DROP TRIGGER IF EXISTS set_updated_at ON proceso_legal;
+DROP TRIGGER IF EXISTS set_updated_at ON propiedad;
 DROP TRIGGER IF EXISTS set_updated_at ON renta;
 CREATE TRIGGER set_updated_at BEFORE
-UPDATE ON user FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+UPDATE ON "user" FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER set_updated_at BEFORE
 UPDATE ON propietario FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER set_updated_at BEFORE
 UPDATE ON socio FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-CREATE TRIGGER set_updated_at BEFORE
-UPDATE ON sociedad FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER set_updated_at BEFORE
 UPDATE ON situacion_fisica FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER set_updated_at BEFORE
@@ -202,12 +211,14 @@ UPDATE ON vocacion_especifica FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER set_updated_at BEFORE
 UPDATE ON proyecto FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER set_updated_at BEFORE
-UPDATE ON ubicacion FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+UPDATE ON sociedad FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER set_updated_at BEFORE
-UPDATE ON propiedad FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+UPDATE ON ubicacion FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER set_updated_at BEFORE
 UPDATE ON garantia FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER set_updated_at BEFORE
 UPDATE ON proceso_legal FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+CREATE TRIGGER set_updated_at BEFORE
+UPDATE ON propiedad FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER set_updated_at BEFORE
 UPDATE ON renta FOR EACH ROW EXECUTE FUNCTION set_updated_at();

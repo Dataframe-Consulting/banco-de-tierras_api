@@ -3,6 +3,9 @@ from app.models.vocacion_especifica import VocacionEspecifica
 from app.schemas.vocacion_especifica import VocacionEspecificaCreate
 import math
 
+def get_all_vocaciones_especificas_without_pagination(db: Session):
+    return db.query(VocacionEspecifica).all()
+
 def get_all_vocaciones_especificas(db: Session, page: int = 1, page_size: int = 10):
     query = db.query(VocacionEspecifica)
     total = query.count()
