@@ -1,11 +1,12 @@
-from sqlalchemy.orm import Session, joinedload
-from app.models.propiedad import Propiedad
-from app.schemas.propiedad import PropiedadCreate
-from app.models.sociedad import Sociedad
-from app.models.ubicacion import Ubicacion
-from app.models.garantia import Garantia
-from app.models.proceso_legal import ProcesoLegal
 import math
+from sqlalchemy.orm import Session, joinedload
+
+from app.models.propiedad import Propiedad, SociedadPropiedad
+
+from app.models.garantia import Garantia
+from app.models.ubicacion import Ubicacion
+from app.schemas.propiedad import PropiedadCreate
+from app.models.proceso_legal import ProcesoLegal
 
 def get_all_propiedades_without_pagination(
     db: Session,
@@ -25,7 +26,7 @@ def get_all_propiedades_without_pagination(
         query = query.filter(Propiedad.proyecto_id == proyecto_id)
 
     if sociedad_id:
-        query = query.join(Propiedad.sociedades).filter(Sociedad.id == sociedad_id)
+        query = query.filter(Propiedad.sociedades.any(SociedadPropiedad.sociedad_id == sociedad_id))
 
     if ubicacion_id:
         query = query.join(Propiedad.ubicaciones).filter(Ubicacion.id == ubicacion_id)
@@ -72,16 +73,20 @@ def create_propiedad(db: Session, propiedad: PropiedadCreate):
 
 def add_sociedad_to_propiedad(db: Session, propiedad_id: int, sociedad_id: int):
     propiedad = db.query(Propiedad).filter(Propiedad.id == propiedad_id).first()
-    sociedad = db.query(Sociedad).filter(Sociedad.id == sociedad_id).first()
-    propiedad.sociedades.append(sociedad)
+    sociedad_propiedad = SociedadPropiedad(sociedad_id=sociedad_id, propiedad_id=propiedad_id)
+    db.add(sociedad_propiedad)
+    propiedad.sociedades.append(sociedad_propiedad)
     db.commit()
     db.refresh(propiedad)
     return propiedad
 
-def remove_sociedad_from_propiedad(db: Session, propiedad_id: int, sociedad_id: int):
+def check_sociedad_in_propiedad(db: Session, propiedad_id: int, sociedad_propiedad_id: int):
+    return db.query(SociedadPropiedad).filter(SociedadPropiedad.propiedad_id == propiedad_id, SociedadPropiedad.id == sociedad_propiedad_id).first()
+
+def remove_sociedad_from_propiedad(db: Session, propiedad_id: int, sociedad_propiedad_id: int):
     propiedad = db.query(Propiedad).filter(Propiedad.id == propiedad_id).first()
-    sociedad = db.query(Sociedad).filter(Sociedad.id == sociedad_id).first()
-    propiedad.sociedades.remove(sociedad)
+    sociedad_propiedad = db.query(SociedadPropiedad).filter(SociedadPropiedad.propiedad_id == propiedad_id, SociedadPropiedad.id == sociedad_propiedad_id).first()
+    db.delete(sociedad_propiedad)
     db.commit()
     db.refresh(propiedad)
     return propiedad

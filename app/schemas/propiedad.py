@@ -3,9 +3,19 @@ from pydantic import BaseModel
 from typing import List, Optional
 from .proyecto import ProyectoResponse
 from .sociedad import SociedadResponse
-from .ubicacion import UbicacionResponse
 from .garantia import GarantiaResponse
+from .ubicacion import UbicacionResponse
 from .proceso_legal import ProcesoLegalResponse
+
+class SociedadPropiedadResponse(BaseModel):
+    id: int
+    sociedad_id: int
+    sociedad: SociedadResponse
+    propiedad_id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 
 class PropiedadBase(BaseModel):
     nombre: str
@@ -25,7 +35,7 @@ class PropiedadCreate(PropiedadBase):
 class PropiedadResponse(PropiedadBase):
     id: int
     proyecto: ProyectoResponse
-    sociedades: List[SociedadResponse] = []
+    sociedades: List[SociedadPropiedadResponse] = []
     ubicaciones: List[UbicacionResponse] = []
     garantias: List[GarantiaResponse] = []
     procesos_legales: List[ProcesoLegalResponse] = []

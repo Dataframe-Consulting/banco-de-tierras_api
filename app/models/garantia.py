@@ -1,6 +1,6 @@
 from app.config.database import Base
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, Float, Boolean, String, Text, Date, TIMESTAMP, func, Table, ForeignKey
+from sqlalchemy import Column, Integer, Float, String, Date, TIMESTAMP, func
 from app.models.propiedad import garantia_propiedad
 
 class Garantia(Base):
