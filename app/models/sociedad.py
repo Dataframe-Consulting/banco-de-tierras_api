@@ -1,7 +1,6 @@
 from app.config.database import Base
-from sqlalchemy import Column, Integer, Float, String, TIMESTAMP, func, Table, ForeignKey
+from sqlalchemy import Column, Integer, Float, TIMESTAMP, func
 from sqlalchemy.orm import relationship
-from app.models.propiedad import sociedad_propiedad
 
 class Sociedad(Base):
     __tablename__ = "sociedad"
@@ -11,4 +10,4 @@ class Sociedad(Base):
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    propiedades = relationship("Propiedad", secondary=sociedad_propiedad, back_populates="sociedades")
+    propiedades = relationship("SociedadPropiedad", back_populates="sociedad")

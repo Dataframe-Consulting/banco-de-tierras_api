@@ -2,20 +2,15 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.config.database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Query
-from app.schemas.propiedad import PropiedadCreate, PropiedadResponse, PaginatedPropiedadesResponse
-from app.services.propiedad import get_all_propiedades, get_all_propiedades_without_pagination, get_propiedad_by_id, get_propiedad_by_nombre, get_propiedad_by_clave_catastral, create_propiedad, add_sociedad_to_propiedad, remove_sociedad_from_propiedad, add_ubicacion_to_propiedad, remove_ubicacion_from_propiedad, add_garantia_to_propiedad, remove_garantia_from_propiedad, add_proceso_legal_to_propiedad, remove_proceso_legal_from_propiedad, update_propiedad, delete_propiedad
+from app.schemas.propiedad import PropiedadCreate, PropiedadResponse
+from app.services.propiedad import get_all_propiedades_without_pagination, get_propiedad_by_id, get_propiedad_by_nombre, get_propiedad_by_clave_catastral, create_propiedad, add_sociedad_to_propiedad, check_sociedad_in_propiedad,  remove_sociedad_from_propiedad, add_ubicacion_to_propiedad, remove_ubicacion_from_propiedad, add_garantia_to_propiedad, remove_garantia_from_propiedad, add_proceso_legal_to_propiedad, remove_proceso_legal_from_propiedad, update_propiedad, delete_propiedad
 from app.services.proyecto import get_proyecto_by_id
 from app.services.sociedad import get_sociedad_by_id
-from app.services.ubicacion import get_ubicacion_by_id
 from app.services.garantia import get_garantia_by_id
+from app.services.ubicacion import get_ubicacion_by_id
 from app.services.proceso_legal import get_proceso_legal_by_id
-from app.utils.auth import get_current_user
 
 router = APIRouter(prefix="/propiedad", tags=["Propiedades"])
-
-# @router.get("/", response_model=PaginatedPropiedadesResponse)
-# def get_propiedades(page: int = 1, page_size: int = 10, db: Session = Depends(get_db)):
-#     return get_all_propiedades(db, page, page_size)
 
 @router.get("/", response_model=List[PropiedadResponse])
 def get_propiedades(
@@ -64,11 +59,8 @@ def remove_sociedad_from_some_propiedad(propiedad_id: int, sociedad_id: int, db:
     db_propiedad = get_propiedad_by_id(db, propiedad_id)
     if not db_propiedad:
         raise HTTPException(status_code=404, detail="Propiedad no encontrada")
-    db_sociedad = get_sociedad_by_id(db, sociedad_id)
-    if not db_sociedad:
-        raise HTTPException(status_code=404, detail="Sociedad no encontrada")
-    sociedad_not_added = all(db_sociedad.id != sociedad.id for sociedad in db_propiedad.sociedades)
-    if sociedad_not_added:
+    sociedad_added = check_sociedad_in_propiedad(db, propiedad_id, sociedad_id)
+    if not sociedad_added:
         raise HTTPException(status_code=400, detail="Sociedad no agregada a la propiedad")
     return remove_sociedad_from_propiedad(db, propiedad_id, sociedad_id)
 
