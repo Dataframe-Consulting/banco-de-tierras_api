@@ -1,8 +1,3 @@
-# python3 -m venv venv -> Crear entorno virtual
-# source venv/bin/activate -> Activar entorno virtual
-# pip install -r requirements.txt -> Instalar dependencias
-# uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload -> Ejecutar servidor
-
 from fastapi import FastAPI, Depends
 from app.config.settings import settings
 from app.utils.auth import get_current_user

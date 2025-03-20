@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from app.utils.bcrypt import verify_password
 from app.services.user import get_user_by_username
 from fastapi import Depends, HTTPException, status, Cookie, Header
-from fastapi.security import OAuth2PasswordBearer
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
