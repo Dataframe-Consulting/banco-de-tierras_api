@@ -1,6 +1,9 @@
 import math
+from sqlalchemy.orm import Session
+
+from app.models.user import User
+
 from app.models.garantia import Garantia
-from sqlalchemy.orm import Session, joinedload
 from app.schemas.garantia import GarantiaCreate
 
 def get_all_garantias_without_pagination(
@@ -33,19 +36,19 @@ def get_all_garantias(db: Session, page: int = 1, page_size: int = 10):
 def get_garantia_by_id(db: Session, garantia_id: int):
     return db.query(Garantia).filter(Garantia.id == garantia_id).first()
 
-def create_garantia(db: Session, garantia: GarantiaCreate):
+def create_garantia(db: Session, garantia: GarantiaCreate, user: User = None):
     new_garantia = Garantia(**garantia.dict())
     db.add(new_garantia)
     db.commit()
     db.refresh(new_garantia)
     return new_garantia
 
-def update_garantia(db: Session, garantia_id: int, garantia: GarantiaCreate):
+def update_garantia(db: Session, garantia_id: int, garantia: GarantiaCreate, user: User = None):
     db.query(Garantia).filter(Garantia.id == garantia_id).update(garantia.dict())
     db.commit()
     return db.query(Garantia).filter(Garantia.id == garantia_id).first()
 
-def delete_garantia(db: Session, garantia_id: int):
+def delete_garantia(db: Session, garantia_id: int, user: User = None):
     garantia = db.query(Garantia).filter(Garantia.id == garantia_id).first()
     if garantia:
         db.delete(garantia)

@@ -141,14 +141,12 @@ CREATE TABLE IF NOT EXISTS renta(
     razon_social VARCHAR(255) NOT NULL,
     renta_sin_iva DECIMAL(10, 2) NOT NULL,
     meses_deposito_garantia INT NOT NULL,
-    -- deposito_garantia_monto DECIMAL(10, 2), SE CALCULA (renta_sin_iva * meses_deposito_garantia)
     meses_gracia INT NOT NULL,
     meses_gracia_fecha_inicio DATE,
     meses_gracia_fecha_fin DATE,
     meses_renta_anticipada INT NOT NULL,
     renta_anticipada_fecha_inicio DATE,
     renta_anticipada_fecha_fin DATE,
-    -- renta_anticipada_renta_sin_iva FLOAT, SE CALCULA (renta_sin_iva * meses_renta_anticipada)
     incremento_mes VARCHAR(255) NOT NULL,
     incremento_nota VARCHAR(255),
     inicio_vigencia DATE NOT NULL,
@@ -163,6 +161,16 @@ CREATE TABLE IF NOT EXISTS propiedad_renta(
     renta_id INT NOT NULL REFERENCES renta(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (propiedad_id, renta_id)
+);
+CREATE TABLE IF NOT EXISTS auditoria (
+    id SERIAL PRIMARY KEY,
+    operacion VARCHAR(50) NOT NULL,
+    tabla_afectada VARCHAR(255) NOT NULL,
+    registro_tabla_id INT NOT NULL,
+    usuario_username VARCHAR(255) NOT NULL,
+    valores_anteriores JSONB,
+    valores_nuevos JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 -- INDEXES
 CREATE INDEX IF NOT EXISTS idx_propietario_socio ON propietario_socio(propietario_id, socio_id);
