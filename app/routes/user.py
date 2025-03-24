@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from app.config.database import get_db
+from app.config.settings import settings
 from app.schemas.user import UserCreate
 from app.services.user import create_user, get_user_by_username, get_user_by_email
 from fastapi import APIRouter, Depends, HTTPException, status, Response
@@ -31,7 +32,8 @@ def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), 
         value=f"Bearer {access_token}",
         httponly=True,
         secure=True,
-        samesite="lax"
+        samesite="None",
+        domain=".banco-de-tierras.vercel.app" if settings.ENV == "production" else "localhost"
     )
     return {"message": "Login exitoso"}
 
