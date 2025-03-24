@@ -14,3 +14,5 @@ class Settings:
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRATION", 30))
 
 settings = Settings()
+
+# TESTING ENV
