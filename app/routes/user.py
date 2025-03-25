@@ -32,8 +32,7 @@ def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), 
         value=f"Bearer {access_token}",
         httponly=True,
         secure=True if settings.ENV == "production" else False,
-        samesite="None" if settings.ENV == "production" else "Lax",
-        domain=settings.CORS_ORIGINS[0].replace("https://", "") if settings.ENV == "production" else None
+        samesite="None" if settings.ENV == "production" else "Lax"
     )
     return {"message": "Login exitoso"}
 
