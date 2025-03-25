@@ -23,6 +23,7 @@ app.add_middleware(
 
 @app.get(f"{settings.API_PREFIX}/health")
 def health_check():
+    print(settings.CORS_ORIGINS)
     return {"status": "ok"}
 
 Base.metadata.create_all(bind=engine)
