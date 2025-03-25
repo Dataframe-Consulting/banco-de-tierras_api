@@ -33,7 +33,7 @@ def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), 
         httponly=True,
         secure=True,
         samesite="None",
-        domain="banco-de-tierras.vercel.app" if settings.ENV == "PRODUCTION" else "localhost"
+        domain="banco-de-tierras.vercel.app" if settings.ENV == "production" else "localhost"
     )
     return {"message": "Login exitoso"}
 
