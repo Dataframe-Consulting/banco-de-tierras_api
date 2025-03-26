@@ -23,7 +23,6 @@ app.add_middleware(
 
 @app.get(f"{settings.API_PREFIX}/health")
 def health_check():
-    print(settings.CORS_ORIGINS)
     return {"status": "ok"}
 
 Base.metadata.create_all(bind=engine)
@@ -37,7 +36,7 @@ app.include_router(vocacion.router, prefix=settings.API_PREFIX, dependencies=[De
 app.include_router(vocacion_especifica.router, prefix=settings.API_PREFIX, dependencies=[Depends(get_current_user)])
 app.include_router(proyecto.router, prefix=settings.API_PREFIX, dependencies=[Depends(get_current_user)])
 app.include_router(ubicacion.router, prefix=settings.API_PREFIX, dependencies=[Depends(get_current_user)])
-app.include_router(propiedad.router, prefix=settings.API_PREFIX, dependencies=[Depends(get_current_user)])
+app.include_router(propiedad.router, prefix=settings.API_PREFIX)
 app.include_router(garantia.router, prefix=settings.API_PREFIX, dependencies=[Depends(get_current_user)])
 app.include_router(proceso_legal.router, prefix=settings.API_PREFIX, dependencies=[Depends(get_current_user)])
 app.include_router(renta.router, prefix=settings.API_PREFIX, dependencies=[Depends(get_current_user)])
