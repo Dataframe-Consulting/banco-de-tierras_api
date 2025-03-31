@@ -3,7 +3,7 @@ from app.config.settings import settings
 from app.utils.auth import get_current_user
 from app.config.database import engine, Base
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import user, propietario, socio, sociedad, situacion_fisica, vocacion, vocacion_especifica, proyecto, ubicacion, propiedad, garantia, proceso_legal, renta
+from app.routes import user, propietario, socio, sociedad, situacion_fisica, vocacion, vocacion_especifica, proyecto, ubicacion, propiedad, garantia, proceso_legal, renta, auditoria
 
 app = FastAPI(
     title="Banco de Tierras API", 
@@ -40,3 +40,4 @@ app.include_router(propiedad.router, prefix=settings.API_PREFIX, dependencies=[D
 app.include_router(garantia.router, prefix=settings.API_PREFIX, dependencies=[Depends(get_current_user)])
 app.include_router(proceso_legal.router, prefix=settings.API_PREFIX, dependencies=[Depends(get_current_user)])
 app.include_router(renta.router, prefix=settings.API_PREFIX, dependencies=[Depends(get_current_user)])
+app.include_router(auditoria.router, prefix=settings.API_PREFIX, dependencies=[Depends(get_current_user)])
