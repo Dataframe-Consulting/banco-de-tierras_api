@@ -7,6 +7,9 @@ from app.models.propietario import Propietario
 # from app.models.sociedad import Sociedad
 import math
 
+from app.models.user import User
+from app.services.auditoria import create_auditoria
+
 def get_all_proyectos_without_pagination(
     db: Session,
     q: str = None,
@@ -60,65 +63,113 @@ def get_proyecto_by_id(db: Session, proyecto_id: int):
 def get_proyecto_by_nombre(db: Session, nombre: str):
     return db.query(Proyecto).filter(Proyecto.nombre == nombre).first()
 
-def create_proyecto(db: Session, proyecto: ProyectoCreate):
+def create_proyecto(db: Session, proyecto: ProyectoCreate, user: User = None):
     new_proyecto = Proyecto(**proyecto.dict())
     db.add(new_proyecto)
     db.commit()
     db.refresh(new_proyecto)
+
+    valores_nuevos = {column.name: getattr(new_proyecto, column.name) for column in new_proyecto.__table__.columns}
+
+    create_auditoria(
+        db,
+        "CREAR",
+        "proyecto",
+        new_proyecto.id,
+        user.username if user else None,
+        None,
+        valores_nuevos,
+    )
+
     return new_proyecto
 
-def add_propietario_to_proyecto(db: Session, proyecto_id: int, propietario_id: int):
+def add_propietario_to_proyecto(db: Session, proyecto_id: int, propietario_id: int, user: User = None):
     proyecto = db.query(Proyecto).filter(Proyecto.id == proyecto_id).first()
     propietario = db.query(Propietario).filter(Propietario.id == propietario_id).first()
     proyecto.propietarios.append(propietario)
     db.commit()
     db.refresh(proyecto)
+
+    valores_nuevos = {column.name: getattr(proyecto, column.name) for column in proyecto.__table__.columns}
+
+    create_auditoria(
+        db,
+        "AGREGAR",
+        "proyecto",
+        proyecto.id,
+        user.username if user else None,
+        None,
+        valores_nuevos,
+    )
+
     return proyecto
 
-def remove_propietario_from_proyecto(db: Session, proyecto_id: int, propietario_id: int):
+def remove_propietario_from_proyecto(db: Session, proyecto_id: int, propietario_id: int, user: User = None):
     proyecto = db.query(Proyecto).filter(Proyecto.id == proyecto_id).first()
     propietario = db.query(Propietario).filter(Propietario.id == propietario_id).first()
     proyecto.propietarios.remove(propietario)
     db.commit()
     db.refresh(proyecto)
+
+    valores_anteriores = {column.name: getattr(proyecto, column.name) for column in proyecto.__table__.columns}
+
+    create_auditoria(
+        db,
+        "QUITAR",
+        "proyecto",
+        proyecto.id,
+        user.username if user else None,
+        valores_anteriores,
+        None,
+    )
+
     return proyecto
 
-# def add_sociedad_to_proyecto(db: Session, proyecto_id: int, sociedad_id: int, valor: float):
-#     proyecto = db.query(Proyecto).filter(Proyecto.id == proyecto_id).first()
-#     sociedad = db.query(Sociedad).filter(Sociedad.id == sociedad_id).first()
-#     sociedad_proyecto = SociedadProyecto(valor=valor, proyecto_id=proyecto_id, sociedad_id=sociedad_id)
-#     db.add(sociedad_proyecto)
-#     proyecto.sociedades.append(sociedad_proyecto)
-#     db.commit()
-#     db.refresh(proyecto)
-#     return proyecto
+def update_proyecto(db: Session, proyecto_id: int, proyecto: ProyectoCreate, user: User = None):
+    # db.query(Proyecto).filter(Proyecto.id == proyecto_id).update(proyecto.dict())
+    # db.commit()
+    # return db.query(Proyecto).filter(Proyecto.id == proyecto_id).first()
+    existing_proyecto = db.query(Proyecto).filter(Proyecto.id == proyecto_id).first()
+    valores_anteriores = {column.name: getattr(existing_proyecto, column.name) for column in existing_proyecto.__table__.columns}
 
-# def check_sociedad_in_proyecto(db: Session, proyecto_id: int, sociedad_id: int):
-#     return db.query(SociedadProyecto).filter(SociedadProyecto.proyecto_id == proyecto_id, SociedadProyecto.sociedad_id == sociedad_id).first()
-
-# def remove_sociedad_from_proyecto(db: Session, proyecto_id: int, sociedad_id: int):
-#     proyecto = db.query(Proyecto).filter(Proyecto.id == proyecto_id).first()
-#     sociedad_proyecto = db.query(SociedadProyecto).filter(SociedadProyecto.proyecto_id == proyecto_id, SociedadProyecto.sociedad_id == sociedad_id).first()
-#     db.delete(sociedad_proyecto)
-#     db.commit()
-#     db.refresh(proyecto)
-#     return proyecto
-
-def update_proyecto(db: Session, proyecto_id: int, proyecto: ProyectoCreate):
     db.query(Proyecto).filter(Proyecto.id == proyecto_id).update(proyecto.dict())
     db.commit()
-    return db.query(Proyecto).filter(Proyecto.id == proyecto_id).first()
+    updated_proyecto = db.query(Proyecto).filter(Proyecto.id == proyecto_id).first()
 
-def delete_proyecto(db: Session, proyecto_id: int):
-    # db.query(SociedadProyecto).filter(SociedadProyecto.proyecto_id == proyecto_id).delete()
-    db.commit()
+    valores_nuevos = {column.name: getattr(updated_proyecto, column.name) for column in updated_proyecto.__table__.columns}
 
+    create_auditoria(
+        db,
+        "EDITAR",
+        "proyecto",
+        updated_proyecto.id,
+        user.username if user else None,
+        valores_anteriores,
+        valores_nuevos,
+    )
+
+    return updated_proyecto
+
+def delete_proyecto(db: Session, proyecto_id: int, user: User = None):
+    # db.commit()
     proyecto = db.query(Proyecto).options(
         joinedload(Proyecto.situacion_fisica),
         joinedload(Proyecto.vocacion),
         joinedload(Proyecto.vocacion_especifica)
     ).filter(Proyecto.id == proyecto_id).first()
     if proyecto:
+        valores_anteriores = {column.name: getattr(proyecto, column.name) for column in proyecto.__table__.columns}
+
         db.delete(proyecto)
         db.commit()
+
+        create_auditoria(
+            db,
+            "ELIMINAR",
+            "proyecto",
+            proyecto.id,
+            user.username if user else None,
+            valores_anteriores,
+            None,
+        )
     return proyecto
