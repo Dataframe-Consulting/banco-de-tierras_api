@@ -1,6 +1,8 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.config.database import get_db
+from app.models.user import User
+from app.utils.auth import get_current_user
 from fastapi import APIRouter, Depends, HTTPException, Query
 from app.schemas.proyecto import ProyectoCreate, ProyectoResponse, PaginatedProyectosResponse
 from app.services.proyecto import get_all_proyectos, get_all_proyectos_without_pagination, get_proyecto_by_id, get_proyecto_by_nombre, create_proyecto, add_propietario_to_proyecto, remove_propietario_from_proyecto, update_proyecto, delete_proyecto 
@@ -37,7 +39,7 @@ def get_proyecto(proyecto_id: int, db: Session = Depends(get_db)):
     return db_proyecto
 
 @router.post("/", response_model=ProyectoResponse)
-def create_new_proyecto(proyecto: ProyectoCreate, db: Session = Depends(get_db)):
+def create_new_proyecto(proyecto: ProyectoCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     db_proyecto = get_proyecto_by_nombre(db, proyecto.nombre)
     if db_proyecto:
         raise HTTPException(status_code=400, detail="El proyecto ya está registrado")
@@ -50,10 +52,10 @@ def create_new_proyecto(proyecto: ProyectoCreate, db: Session = Depends(get_db))
     db_vocacion_especifica = get_vocacion_especifica_by_id(db, proyecto.vocacion_especifica_id)
     if not db_vocacion_especifica:
         raise HTTPException(status_code=404, detail="Vocación específica no encontrada")
-    return create_proyecto(db, proyecto)
+    return create_proyecto(db, proyecto, user)
 
 @router.post("/{proyecto_id}/propietario/{propietario_id}", response_model=ProyectoResponse)
-def add_propietario_to_some_proyecto(proyecto_id: int, propietario_id: int, db: Session = Depends(get_db)):
+def add_propietario_to_some_proyecto(proyecto_id: int, propietario_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     db_proyecto = get_proyecto_by_id(db, proyecto_id)
     if not db_proyecto:
         raise HTTPException(status_code=404, detail="Proyecto no encontrado")
@@ -63,10 +65,10 @@ def add_propietario_to_some_proyecto(proyecto_id: int, propietario_id: int, db: 
     propietario_already_added = any(db_propietario.id == propietario.id for propietario in db_proyecto.propietarios)
     if propietario_already_added:
         raise HTTPException(status_code=400, detail="Propietario ya agregado al proyecto")
-    return add_propietario_to_proyecto(db, proyecto_id, propietario_id)
+    return add_propietario_to_proyecto(db, proyecto_id, propietario_id, user)
 
 @router.delete("/{proyecto_id}/propietario/{propietario_id}", response_model=ProyectoResponse)
-def remove_propietario_from_some_proyecto(proyecto_id: int, propietario_id: int, db: Session = Depends(get_db)):
+def remove_propietario_from_some_proyecto(proyecto_id: int, propietario_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     db_proyecto = get_proyecto_by_id(db, proyecto_id)
     if not db_proyecto:
         raise HTTPException(status_code=404, detail="Proyecto no encontrado")
@@ -76,36 +78,10 @@ def remove_propietario_from_some_proyecto(proyecto_id: int, propietario_id: int,
     propietario_not_added = all(db_propietario.id != propietario.id for propietario in db_proyecto.propietarios)
     if propietario_not_added:
         raise HTTPException(status_code=400, detail="Propietario no agregado al proyecto")
-    return remove_propietario_from_proyecto(db, proyecto_id, propietario_id)
-
-# @router.post("/{proyecto_id}/sociedad/{sociedad_id}/{valor}", response_model=ProyectoResponse)
-# def add_sociedad_to_some_proyecto(proyecto_id: int, sociedad_id: int, valor: float, db: Session = Depends(get_db)):
-#     db_proyecto = get_proyecto_by_id(db, proyecto_id)
-#     if not db_proyecto:
-#         raise HTTPException(status_code=404, detail="Proyecto no encontrado")
-#     db_sociedad = get_sociedad_by_id(db, sociedad_id)
-#     if not db_sociedad:
-#         raise HTTPException(status_code=404, detail="Sociedad no encontrada")
-#     sociedad_already_added = any(db_sociedad.id == sociedad_id for sociedad in db_proyecto.sociedades)
-#     if sociedad_already_added:
-#         raise HTTPException(status_code=400, detail="Sociedad ya agregada al proyecto")
-#     return add_sociedad_to_proyecto(db, proyecto_id, sociedad_id, valor)
-
-# @router.delete("/{proyecto_id}/sociedad/{sociedad_id}", response_model=ProyectoResponse)
-# def remove_sociedad_from_some_proyecto(proyecto_id: int, sociedad_id: int, db: Session = Depends(get_db)):
-#     db_proyecto = get_proyecto_by_id(db, proyecto_id)
-#     if not db_proyecto:
-#         raise HTTPException(status_code=404, detail="Proyecto no encontrado")
-#     db_sociedad = get_sociedad_by_id(db, sociedad_id)
-#     if not db_sociedad:
-#         raise HTTPException(status_code=404, detail="Sociedad no encontrada")
-#     sociedad_not_added = check_sociedad_in_proyecto(db, proyecto_id, sociedad_id)
-#     if not sociedad_not_added:
-#         raise HTTPException(status_code=400, detail="Sociedad no agregada al proyecto")
-#     return remove_sociedad_from_proyecto(db, proyecto_id, sociedad_id)    
+    return remove_propietario_from_proyecto(db, proyecto_id, propietario_id, user)
 
 @router.put("/{proyecto_id}", response_model=ProyectoResponse)
-def update_some_proyecto(proyecto_id: int, proyecto: ProyectoCreate, db: Session = Depends(get_db)):
+def update_some_proyecto(proyecto_id: int, proyecto: ProyectoCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     db_proyecto = get_proyecto_by_id(db, proyecto_id)
     if not db_proyecto:
         raise HTTPException(status_code=404, detail="Proyecto no encontrado")
@@ -118,11 +94,11 @@ def update_some_proyecto(proyecto_id: int, proyecto: ProyectoCreate, db: Session
     db_vocacion_especifica = get_vocacion_especifica_by_id(db, proyecto.vocacion_especifica_id)
     if not db_vocacion_especifica:
         raise HTTPException(status_code=404, detail="Vocación específica no encontrada")
-    return update_proyecto(db, proyecto_id, proyecto)
+    return update_proyecto(db, proyecto_id, proyecto, user)
 
 @router.delete("/{proyecto_id}", response_model=ProyectoResponse)
-def remove_proyecto(proyecto_id: int, db: Session = Depends(get_db)):
+def remove_proyecto(proyecto_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     db_proyecto = get_proyecto_by_id(db, proyecto_id)
     if not db_proyecto:
         raise HTTPException(status_code=404, detail="Proyecto no encontrado")
-    return delete_proyecto(db, proyecto_id)
+    return delete_proyecto(db, proyecto_id, user)
