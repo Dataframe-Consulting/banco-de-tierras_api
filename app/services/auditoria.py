@@ -8,6 +8,8 @@ def get_all_auditorias(
     operacion: str = None,
     tabla_afectada: str = None,
     usuario_username: str = None,
+    registrado_desde: str = None,
+    registrado_hasta: str = None,
 ):
     query = db.query(Auditoria)
 
@@ -19,6 +21,11 @@ def get_all_auditorias(
 
     if usuario_username:
         query = query.filter(Auditoria.usuario_username.ilike(f"%{usuario_username}%"))
+
+    if registrado_desde:
+        query = query.filter(Auditoria.created_at >= registrado_desde)
+    if registrado_hasta:
+        query = query.filter(Auditoria.created_at <= registrado_hasta)
 
     auditorias = query.all()
 
