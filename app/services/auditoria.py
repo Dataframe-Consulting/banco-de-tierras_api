@@ -14,13 +14,13 @@ def get_all_auditorias(
     query = db.query(Auditoria)
 
     if operacion:
-        query = query.filter(Auditoria.operacion.ilike(f"%{operacion}%"))
+        query = query.filter(Auditoria.operacion == operacion)
 
     if tabla_afectada:
         query = query.filter(Auditoria.tabla_afectada.ilike(f"%{tabla_afectada}%"))
 
     if usuario_username:
-        query = query.filter(Auditoria.usuario_username.ilike(f"%{usuario_username}%"))
+        query = query.filter(Auditoria.usuario_username == usuario_username)
 
     if registrado_desde:
         query = query.filter(Auditoria.created_at >= registrado_desde)
