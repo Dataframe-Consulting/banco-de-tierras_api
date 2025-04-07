@@ -5,22 +5,41 @@ from .situacion_fisica import SituacionFisicaResponse
 from .vocacion import VocacionResponse
 from .vocacion_especifica import VocacionEspecificaResponse
 from .propietario import PropietarioResponse
-# from .sociedad import SociedadResponse
+from .sociedad import SociedadResponse
+from .garantia import GarantiaResponse
+from .ubicacion import UbicacionResponse
+from .proceso_legal import ProcesoLegalResponse
 
-# class SociedadProyectoBase(BaseModel):
-#     valor: float
+class SociedadPropiedadResponse(BaseModel):
+    id: int
+    sociedad_id: int
+    sociedad: SociedadResponse
+    propiedad_id: int
+    created_at: datetime
 
-# class SociedadProyectoCreate(SociedadProyectoBase):
-#     pass
+    class Config:
+        from_attributes = True
 
-# class SociedadProyectoResponse(SociedadProyectoBase):
-#     sociedad_id: int
-#     proyecto_id: int
-#     sociedad: SociedadResponse
-#     created_at: datetime
+class PropiedadSimpleResponse(BaseModel):
+    id: int
+    nombre: str
+    superficie: float
+    valor_comercial: float
+    anio_valor_comercial: Optional[int] = None
+    clave_catastral: str
+    base_predial: float
+    adeudo_predial: Optional[float] = None
+    anios_pend_predial: Optional[int] = None
+    comentarios: Optional[str] = None
+    sociedades: List[SociedadPropiedadResponse] = []
+    ubicaciones: List[UbicacionResponse] = []
+    garantias: List[GarantiaResponse] = []
+    procesos_legales: List[ProcesoLegalResponse] = []
+    created_at: datetime
+    updated_at: datetime
 
-#     class Config:
-#         from_attributes = True
+    class Config:
+        from_attributes = True
 
 class ProyectoBase(BaseModel):
     nombre: str
@@ -40,7 +59,7 @@ class ProyectoResponse(ProyectoBase):
     vocacion: VocacionResponse
     vocacion_especifica: VocacionEspecificaResponse
     propietarios: List[PropietarioResponse] = []
-    # sociedades: List[SociedadProyectoResponse] = []
+    propiedades: List[PropiedadSimpleResponse] = []
     created_at: datetime
     updated_at: datetime
 

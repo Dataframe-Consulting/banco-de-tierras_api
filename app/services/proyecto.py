@@ -1,10 +1,7 @@
-from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 from app.models.proyecto import Proyecto
-# , SociedadProyecto
 from app.schemas.proyecto import ProyectoCreate
 from app.models.propietario import Propietario
-# from app.models.sociedad import Sociedad
 import math
 
 from app.models.user import User
@@ -15,7 +12,6 @@ def get_all_proyectos_without_pagination(
     q: str = None,
     propietario_id: int = None,
     situacion_fisica_id: int = None,
-    # sociedad_id: int = None,
     vocacion_id: int = None,
     vocacion_especifica_id: int = None
 ):
@@ -29,9 +25,6 @@ def get_all_proyectos_without_pagination(
 
     if(situacion_fisica_id):
         query = query.filter(Proyecto.situacion_fisica_id == situacion_fisica_id)
-
-    # if(sociedad_id):
-    #     query = query.filter(Proyecto.sociedades.any(SociedadProyecto.sociedad_id == sociedad_id))
 
     if(vocacion_id):
         query = query.filter(Proyecto.vocacion_id == vocacion_id)
