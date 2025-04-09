@@ -1,7 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel
 from typing import List
-from .socio import SocioResponse
 
 class PropietarioBase(BaseModel):
     nombre: str
@@ -12,7 +11,6 @@ class PropietarioCreate(PropietarioBase):
 
 class PropietarioResponse(PropietarioBase):
     id: int
-    socios: List[SocioResponse] = []
     created_at: datetime
     updated_at: datetime
 

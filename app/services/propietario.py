@@ -1,11 +1,11 @@
-from sqlalchemy.orm import Session
-from app.models.propietario import Propietario
-from app.models.socio import Socio
-from app.schemas.propietario import PropietarioCreate
-from app.schemas.socio import SocioCreate
 import math
+from sqlalchemy.orm import Session
+
 from app.models.user import User
 from app.services.auditoria import create_auditoria
+
+from app.models.propietario import Propietario
+from app.schemas.propietario import PropietarioCreate
 
 def get_all_propietarios_without_pagination(db: Session):
     return db.query(Propietario).all()
@@ -51,48 +51,6 @@ def create_propietario(db: Session, propietario: PropietarioCreate, user: User =
     )
 
     return new_propietario
-
-def add_socio_to_propietario(db: Session, propietario_id: int, socio_id: int, user: User = None):
-    propietario = db.query(Propietario).filter(Propietario.id == propietario_id).first()
-    socio = db.query(Socio).filter(Socio.id == socio_id).first()
-    propietario.socios.append(socio)
-    db.commit()
-    db.refresh(propietario)
-
-    valores_nuevos = {column.name: getattr(propietario, column.name) for column in propietario.__table__.columns}
-
-    create_auditoria(
-        db,
-        "AGREGAR",
-        "socio",
-        propietario.id,
-        user.username if user else None,
-        None,
-        valores_nuevos,
-    )
-
-    return propietario
-
-def remove_socio_from_propietario(db: Session, propietario_id: int, socio_id: int, user: User = None):
-    propietario = db.query(Propietario).filter(Propietario.id == propietario_id).first()
-    socio = db.query(Socio).filter(Socio.id == socio_id).first()
-    propietario.socios.remove(socio)
-    db.commit()
-    db.refresh(propietario)
-
-    valores_anteriores = {column.name: getattr(propietario, column.name) for column in propietario.__table__.columns}
-
-    create_auditoria(
-        db,
-        "QUITAR",
-        "socio",
-        propietario.id,
-        user.username if user else None,
-        valores_anteriores,
-        None,
-    )
-
-    return propietario
 
 def update_propietario(db: Session, propietario_id: int, propietario: PropietarioCreate, user: User = None):
     existing_propietario = db.query(Propietario).filter(Propietario.id == propietario_id).first()
