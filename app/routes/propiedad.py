@@ -5,8 +5,9 @@ from app.models.user import User
 from app.utils.auth import get_current_user
 from fastapi import APIRouter, Depends, HTTPException, Query
 from app.schemas.propiedad import PropiedadCreate, PropiedadResponse
-from app.services.propiedad import get_all_propiedades_without_pagination, get_propiedad_by_id, get_propiedad_by_nombre, get_propiedad_by_clave_catastral, create_propiedad, add_sociedad_to_propiedad, check_sociedad_in_propiedad,  remove_sociedad_from_propiedad, add_ubicacion_to_propiedad, remove_ubicacion_from_propiedad, add_garantia_to_propiedad, remove_garantia_from_propiedad, add_proceso_legal_to_propiedad, remove_proceso_legal_from_propiedad, update_propiedad, delete_propiedad
+from app.services.propiedad import get_all_propiedades_without_pagination, get_propiedad_by_id, get_propiedad_by_nombre, get_propiedad_by_clave_catastral, create_propiedad, check_propietario_sociedad_in_propiedad, add_propietario_sociedad_to_propiedad, remove_propietario_sociedad_from_propiedad, add_ubicacion_to_propiedad, remove_ubicacion_from_propiedad, add_garantia_to_propiedad, remove_garantia_from_propiedad, add_proceso_legal_to_propiedad, remove_proceso_legal_from_propiedad, update_propiedad, delete_propiedad
 from app.services.proyecto import get_proyecto_by_id
+from app.services.propietario import get_propietario_by_id
 from app.services.sociedad import get_sociedad_by_id
 from app.services.garantia import get_garantia_by_id
 from app.services.ubicacion import get_ubicacion_by_id
@@ -19,12 +20,11 @@ def get_propiedades(
     db: Session = Depends(get_db),
     q: Optional[str] = Query(None, description="Busca por nombre..."),
     proyecto_id: Optional[int] = Query(None, description="Filtrar por ID de proyecto"),
-    sociedad_id: Optional[int] = Query(None, description="Filtrar por ID de sociedad"),
     ubicacion_id: Optional[int] = Query(None, description="Filtrar por ID de ubicación"),
     garantia_id: Optional[int] = Query(None, description="Filtrar por ID de garantía"),
     proceso_legal_id: Optional[int] = Query(None, description="Filtrar por ID de proceso legal")
 ):
-    return get_all_propiedades_without_pagination(db, q, proyecto_id, sociedad_id, ubicacion_id, garantia_id, proceso_legal_id)
+    return get_all_propiedades_without_pagination(db, q, proyecto_id, ubicacion_id, garantia_id, proceso_legal_id)
 
 @router.get("/{propiedad_id}", response_model=PropiedadResponse)
 def get_propiedad(propiedad_id: int, db: Session = Depends(get_db)):
@@ -46,25 +46,37 @@ def create_new_propiedad(propiedad: PropiedadCreate, db: Session = Depends(get_d
         raise HTTPException(status_code=404, detail="Proyecto no encontrado")
     return create_propiedad(db, propiedad, user)
 
-@router.post("/{propiedad_id}/sociedad/{sociedad_id}", response_model=PropiedadResponse)
-def add_sociedad_to_some_propiedad(propiedad_id: int, sociedad_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+@router.post("/{propiedad_id}/propietario/{propietario_id}/sociedad/{sociedad_id}/es_socio/{es_socio}", response_model=PropiedadResponse)
+def add_propietario_sociedad_to_some_propiedad(propiedad_id: int, propietario_id: int, sociedad_id: int, es_socio: bool, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     db_propiedad = get_propiedad_by_id(db, propiedad_id)
     if not db_propiedad:
         raise HTTPException(status_code=404, detail="Propiedad no encontrada")
+    db_propietario = get_propietario_by_id(db, propietario_id)
+    if not db_propietario:
+        raise HTTPException(status_code=404, detail="Propietario no encontrado")
     db_sociedad = get_sociedad_by_id(db, sociedad_id)
     if not db_sociedad:
         raise HTTPException(status_code=404, detail="Sociedad no encontrada")
-    return add_sociedad_to_propiedad(db, propiedad_id, sociedad_id, user)
+    register_already_exists = check_propietario_sociedad_in_propiedad(db, propiedad_id, propietario_id, sociedad_id)
+    if register_already_exists:
+        raise HTTPException(status_code=400, detail="Este registro ya existe")
+    return add_propietario_sociedad_to_propiedad(db, propiedad_id, propietario_id, sociedad_id, es_socio, user)
 
-@router.delete("/{propiedad_id}/sociedad/{sociedad_id}", response_model=PropiedadResponse)
-def remove_sociedad_from_some_propiedad(propiedad_id: int, sociedad_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+@router.delete("/{propiedad_id}/propietario/{propietario_id}/sociedad/{sociedad_id}", response_model=PropiedadResponse)
+def remove_propietario_sociedad_from_some_propiedad(propiedad_id: int, propietario_id: int, sociedad_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     db_propiedad = get_propiedad_by_id(db, propiedad_id)
     if not db_propiedad:
         raise HTTPException(status_code=404, detail="Propiedad no encontrada")
-    sociedad_added = check_sociedad_in_propiedad(db, propiedad_id, sociedad_id)
-    if not sociedad_added:
-        raise HTTPException(status_code=400, detail="Sociedad no agregada a la propiedad")
-    return remove_sociedad_from_propiedad(db, propiedad_id, sociedad_id, user)
+    db_propietario = get_propietario_by_id(db, propietario_id)
+    if not db_propietario:
+        raise HTTPException(status_code=404, detail="Propietario no encontrado")
+    db_sociedad = get_sociedad_by_id(db, sociedad_id)
+    if not db_sociedad:
+        raise HTTPException(status_code=404, detail="Sociedad no encontrada")
+    register_not_exists = check_propietario_sociedad_in_propiedad(db, propiedad_id, propietario_id, sociedad_id)
+    if not register_not_exists:
+        raise HTTPException(status_code=400, detail="Este registro no existe")
+    return remove_propietario_sociedad_from_propiedad(db, propiedad_id, propietario_id, sociedad_id, user)
 
 @router.post("/{propiedad_id}/ubicacion/{ubicacion_id}", response_model=PropiedadResponse)
 def add_ubicacion_to_some_propiedad(propiedad_id: int, ubicacion_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):

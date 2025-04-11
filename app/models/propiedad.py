@@ -1,18 +1,20 @@
 from app.config.database import Base
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, Float, String, Text, TIMESTAMP, func, Table, ForeignKey
+from sqlalchemy import Column, Integer, Float, Boolean, String, Text, TIMESTAMP, func, Table, ForeignKey
 from app.models.renta import propiedad_renta
 
-class SociedadPropiedad(Base):
-    __tablename__ = "sociedad_propiedad"
+class PropietarioSociedadPropiedad(Base):
+    __tablename__ = "propietario_sociedad_propiedad"
 
-    id = Column(Integer, primary_key=True, index=True)
-    sociedad_id = Column(Integer, ForeignKey("sociedad.id", ondelete="CASCADE"))
-    propiedad_id = Column(Integer, ForeignKey("propiedad.id", ondelete="CASCADE"))
+    es_socio = Column(Boolean, nullable=False)
+    propietario_id = Column(Integer, ForeignKey("propietario.id", ondelete="CASCADE"), primary_key=True)
+    sociedad_id = Column(Integer, ForeignKey("sociedad.id", ondelete="CASCADE"), primary_key=True)
+    propiedad_id = Column(Integer, ForeignKey("propiedad.id", ondelete="CASCADE"), primary_key=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
+    propietario = relationship("Propietario", back_populates="propiedades")
     sociedad = relationship("Sociedad", back_populates="propiedades")
-    propiedad = relationship("Propiedad", back_populates="sociedades")
+    propiedad = relationship("Propiedad", back_populates="propietarios_sociedades")
 
 ubicacion_propiedad = Table(
     "ubicacion_propiedad",
@@ -53,7 +55,7 @@ class Propiedad(Base):
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     proyecto = relationship("Proyecto", back_populates="propiedades")
-    sociedades = relationship("SociedadPropiedad", back_populates="propiedad")
+    propietarios_sociedades = relationship("PropietarioSociedadPropiedad", back_populates="propiedad")
     ubicaciones = relationship("Ubicacion", secondary=ubicacion_propiedad, back_populates="propiedades")
     garantias = relationship("Garantia", secondary=garantia_propiedad, back_populates="propiedades")
     procesos_legales = relationship("ProcesoLegal", secondary=proceso_legal_propiedad, back_populates="propiedades")
