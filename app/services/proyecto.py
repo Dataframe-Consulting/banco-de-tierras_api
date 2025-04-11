@@ -10,7 +10,6 @@ from app.services.auditoria import create_auditoria
 def get_all_proyectos_without_pagination(
     db: Session,
     q: str = None,
-    propietario_id: int = None,
     situacion_fisica_id: int = None,
     vocacion_id: int = None,
     vocacion_especifica_id: int = None
@@ -19,9 +18,6 @@ def get_all_proyectos_without_pagination(
 
     if(q):
         query = query.filter(Proyecto.nombre.ilike(f"%{q}%"))
-
-    if(propietario_id):
-        query = query.join(Proyecto.propietarios).filter(Propietario.id == propietario_id)
 
     if(situacion_fisica_id):
         query = query.filter(Proyecto.situacion_fisica_id == situacion_fisica_id)
