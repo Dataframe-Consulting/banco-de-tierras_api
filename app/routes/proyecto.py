@@ -21,12 +21,11 @@ router = APIRouter(prefix="/proyecto", tags=["Proyectos"])
 def get_proyectos(
     db: Session = Depends(get_db),
     q: Optional[str] = Query(None, description="Busca por nombre..."),
-    propietario_id: Optional[int] = Query(None, description="Filtrar por ID de propietario"),
     situacion_fisica_id: Optional[int] = Query(None, description="Filtrar por ID de situación física"),
     vocacion_id: Optional[int] = Query(None, description="Filtrar por ID de vocación"),
     vocacion_especifica_id: Optional[int] = Query(None, description="Filtrar por ID de vocación específica")
 ):
-    return get_all_proyectos_without_pagination(db, q, propietario_id, situacion_fisica_id, vocacion_id, vocacion_especifica_id)
+    return get_all_proyectos_without_pagination(db, q, situacion_fisica_id, vocacion_id, vocacion_especifica_id)
 
 @router.get("/{proyecto_id}", response_model=ProyectoResponse)
 def get_proyecto(proyecto_id: int, db: Session = Depends(get_db)):

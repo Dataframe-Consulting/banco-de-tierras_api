@@ -4,7 +4,6 @@ from typing import List, Optional
 from .situacion_fisica import SituacionFisicaResponse
 from .vocacion import VocacionResponse
 from .vocacion_especifica import VocacionEspecificaResponse
-from .propietario import PropietarioResponse
 from .sociedad import SociedadResponse
 from .garantia import GarantiaResponse
 from .ubicacion import UbicacionResponse
@@ -58,7 +57,6 @@ class ProyectoResponse(ProyectoBase):
     situacion_fisica: SituacionFisicaResponse
     vocacion: VocacionResponse
     vocacion_especifica: VocacionEspecificaResponse
-    propietarios: List[PropietarioResponse] = []
     propiedades: List[PropiedadSimpleResponse] = []
     created_at: datetime
     updated_at: datetime

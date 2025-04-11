@@ -2,13 +2,6 @@ from app.config.database import Base
 from sqlalchemy import Column, Integer, Float, Boolean, String, Text, TIMESTAMP, func, Table, ForeignKey
 from sqlalchemy.orm import relationship
 
-propietario_proyecto = Table(
-    "propietario_proyecto",
-    Base.metadata,
-    Column("propietario_id", ForeignKey("propietario.id", ondelete="CASCADE"), primary_key=True),
-    Column("proyecto_id", ForeignKey("proyecto.id", ondelete="CASCADE"), primary_key=True)
-)
-
 class Proyecto(Base):
     __tablename__ = "proyecto"
 
@@ -27,5 +20,4 @@ class Proyecto(Base):
     vocacion = relationship("Vocacion", back_populates="proyectos")
     vocacion_especifica = relationship("VocacionEspecifica", back_populates="proyectos")
 
-    propietarios = relationship("Propietario", secondary=propietario_proyecto, back_populates="proyectos")
     propiedades = relationship("Propiedad", back_populates="proyecto")
