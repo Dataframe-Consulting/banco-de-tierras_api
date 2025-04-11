@@ -292,6 +292,9 @@ def update_propiedad(db: Session, propiedad_id: int, propiedad: PropiedadCreate,
     return updated_propiedad
 
 def delete_propiedad(db: Session, propiedad_id: int, user: User = None):
+    db.query(PropietarioSociedadPropiedad).filter(PropietarioSociedadPropiedad.propiedad_id == propiedad_id).delete()
+    db.commit()
+
     propiedad = db.query(Propiedad).options(
         joinedload(Propiedad.proyecto)
     ).filter(Propiedad.id == propiedad_id).first()
