@@ -5,10 +5,9 @@ from app.models.user import User
 from app.utils.auth import get_current_user
 from fastapi import APIRouter, Depends, HTTPException, Query
 from app.schemas.propiedad import PropiedadCreate, PropiedadResponse
-from app.services.propiedad import get_all_propiedades_without_pagination, get_propiedad_by_id, get_propiedad_by_nombre, get_propiedad_by_clave_catastral, create_propiedad, check_propietario_sociedad_in_propiedad, add_propietario_sociedad_to_propiedad, remove_propietario_sociedad_from_propiedad, add_ubicacion_to_propiedad, remove_ubicacion_from_propiedad, add_garantia_to_propiedad, remove_garantia_from_propiedad, add_proceso_legal_to_propiedad, remove_proceso_legal_from_propiedad, update_propiedad, delete_propiedad
+from app.services.propiedad import get_all_propiedades_without_pagination, get_propiedad_by_id, get_propiedad_by_nombre, get_propiedad_by_clave_catastral, create_propiedad, check_propietario_in_propiedad, add_propietario_to_propiedad, remove_propietario_from_propiedad, add_ubicacion_to_propiedad, remove_ubicacion_from_propiedad, add_garantia_to_propiedad, remove_garantia_from_propiedad, add_proceso_legal_to_propiedad, remove_proceso_legal_from_propiedad, update_propiedad, delete_propiedad
 from app.services.proyecto import get_proyecto_by_id
 from app.services.propietario import get_propietario_by_id
-from app.services.sociedad import get_sociedad_by_id
 from app.services.garantia import get_garantia_by_id
 from app.services.ubicacion import get_ubicacion_by_id
 from app.services.proceso_legal import get_proceso_legal_by_id
@@ -46,37 +45,33 @@ def create_new_propiedad(propiedad: PropiedadCreate, db: Session = Depends(get_d
         raise HTTPException(status_code=404, detail="Proyecto no encontrado")
     return create_propiedad(db, propiedad, user)
 
-@router.post("/{propiedad_id}/propietario/{propietario_id}/sociedad/{sociedad_id}/es_socio/{es_socio}", response_model=PropiedadResponse)
-def add_propietario_sociedad_to_some_propiedad(propiedad_id: int, propietario_id: int, sociedad_id: int, es_socio: bool, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+@router.post("/{propiedad_id}/propietario/{propietario_id}/sociedad/{sociedad_porcentaje_participacion}/es_socio/{es_socio}", response_model=PropiedadResponse)
+def add_propietario_sociedad_to_some_propiedad(propiedad_id: int, propietario_id: int, sociedad_porcentaje_participacion: float, es_socio: bool, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     db_propiedad = get_propiedad_by_id(db, propiedad_id)
     if not db_propiedad:
         raise HTTPException(status_code=404, detail="Propiedad no encontrada")
     db_propietario = get_propietario_by_id(db, propietario_id)
     if not db_propietario:
         raise HTTPException(status_code=404, detail="Propietario no encontrado")
-    db_sociedad = get_sociedad_by_id(db, sociedad_id)
-    if not db_sociedad:
-        raise HTTPException(status_code=404, detail="Sociedad no encontrada")
-    register_already_exists = check_propietario_sociedad_in_propiedad(db, propiedad_id, propietario_id, sociedad_id)
+    register_already_exists = check_propietario_in_propiedad(db, propiedad_id, propietario_id)
     if register_already_exists:
         raise HTTPException(status_code=400, detail="Este registro ya existe")
-    return add_propietario_sociedad_to_propiedad(db, propiedad_id, propietario_id, sociedad_id, es_socio, user)
+    if sociedad_porcentaje_participacion <= 0 or sociedad_porcentaje_participacion > 100:
+        raise HTTPException(status_code=400, detail="El porcentaje de participación debe ser mayor a 0 y menor o igual a 100")
+    return add_propietario_to_propiedad(db, propiedad_id, propietario_id, sociedad_porcentaje_participacion, es_socio, user)
 
-@router.delete("/{propiedad_id}/propietario/{propietario_id}/sociedad/{sociedad_id}", response_model=PropiedadResponse)
-def remove_propietario_sociedad_from_some_propiedad(propiedad_id: int, propietario_id: int, sociedad_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+@router.delete("/{propiedad_id}/propietario/{propietario_id}", response_model=PropiedadResponse)
+def remove_propietario_sociedad_from_some_propiedad(propiedad_id: int, propietario_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     db_propiedad = get_propiedad_by_id(db, propiedad_id)
     if not db_propiedad:
         raise HTTPException(status_code=404, detail="Propiedad no encontrada")
     db_propietario = get_propietario_by_id(db, propietario_id)
     if not db_propietario:
         raise HTTPException(status_code=404, detail="Propietario no encontrado")
-    db_sociedad = get_sociedad_by_id(db, sociedad_id)
-    if not db_sociedad:
-        raise HTTPException(status_code=404, detail="Sociedad no encontrada")
-    register_not_exists = check_propietario_sociedad_in_propiedad(db, propiedad_id, propietario_id, sociedad_id)
+    register_not_exists = check_propietario_in_propiedad(db, propiedad_id, propietario_id)
     if not register_not_exists:
         raise HTTPException(status_code=400, detail="Este registro no existe")
-    return remove_propietario_sociedad_from_propiedad(db, propiedad_id, propietario_id, sociedad_id, user)
+    return remove_propietario_from_propiedad(db, propiedad_id, propietario_id, user)
 
 @router.post("/{propiedad_id}/ubicacion/{ubicacion_id}", response_model=PropiedadResponse)
 def add_ubicacion_to_some_propiedad(propiedad_id: int, ubicacion_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):

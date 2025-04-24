@@ -3,7 +3,6 @@ from pydantic import BaseModel
 from typing import List, Optional
 from .proyecto import ProyectoResponse
 from .propietario import PropietarioResponse
-from .sociedad import SociedadResponse
 from .garantia import GarantiaResponse
 from .ubicacion import UbicacionResponse
 from .proceso_legal import ProcesoLegalResponse
@@ -29,17 +28,16 @@ class RentaSimpleResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-class PropietarioSociedadPropiedadBase(BaseModel):
+class PropietarioPropiedadBase(BaseModel):
     es_socio: bool
+    sociedad_porcentaje_participacion: float
 
-class PropietarioSociedadPropiedadCreate(PropietarioSociedadPropiedadBase):
+class PropietarioPropiedadCreate(PropietarioPropiedadBase):
     pass
 
-class PropietarioSociedadPropiedadResponse(PropietarioSociedadPropiedadBase):
+class PropietarioPropiedadResponse(PropietarioPropiedadBase):
     propietario_id: int
     propietario: PropietarioResponse
-    sociedad_id: int
-    sociedad: SociedadResponse
     propiedad_id: int
     created_at: datetime
 
@@ -64,7 +62,7 @@ class PropiedadCreate(PropiedadBase):
 class PropiedadResponse(PropiedadBase):
     id: int
     proyecto: ProyectoResponse
-    propietarios_sociedades: List[PropietarioSociedadPropiedadResponse] = []
+    propietarios: List[PropietarioPropiedadResponse] = []
     ubicaciones: List[UbicacionResponse] = []
     garantias: List[GarantiaResponse] = []
     procesos_legales: List[ProcesoLegalResponse] = []

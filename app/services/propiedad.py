@@ -1,7 +1,7 @@
 import math
 from sqlalchemy.orm import Session, joinedload
 
-from app.models.propiedad import Propiedad, PropietarioSociedadPropiedad
+from app.models.propiedad import Propiedad, PropietarioPropiedad
 
 from app.models.user import User
 
@@ -83,32 +83,31 @@ def create_propiedad(db: Session, propiedad: PropiedadCreate, user: User = None)
 
     return new_propiedad
 
-def check_propietario_sociedad_in_propiedad(db: Session, propiedad_id: int, propietario_id: int, sociedad_id: int):
-    return db.query(PropietarioSociedadPropiedad).filter(
-        PropietarioSociedadPropiedad.propiedad_id == propiedad_id,
-        PropietarioSociedadPropiedad.propietario_id == propietario_id,
-        PropietarioSociedadPropiedad.sociedad_id == sociedad_id
+def check_propietario_in_propiedad(db: Session, propiedad_id: int, propietario_id: int):
+    return db.query(PropietarioPropiedad).filter(
+        PropietarioPropiedad.propiedad_id == propiedad_id,
+        PropietarioPropiedad.propietario_id == propietario_id
     ).first()
 
-def add_propietario_sociedad_to_propiedad(db: Session, propiedad_id: int, propietario_id: int, sociedad_id: int, es_socio: bool, user: User = None):
+def add_propietario_to_propiedad(db: Session, propiedad_id: int, propietario_id: int, sociedad_porcentaje_participacion: float, es_socio: bool, user: User = None):
     propiedad = db.query(Propiedad).filter(Propiedad.id == propiedad_id).first()
-    propietario_sociedad_propiedad = PropietarioSociedadPropiedad(
+    propietario_propiedad = PropietarioPropiedad(
         es_socio=es_socio,
+        sociedad_porcentaje_participacion=sociedad_porcentaje_participacion,
         propietario_id=propietario_id,
-        sociedad_id=sociedad_id,
         propiedad_id=propiedad_id
     )
-    propiedad.propietarios_sociedades.append(propietario_sociedad_propiedad)
+    propiedad.propietarios.append(propietario_propiedad)
     db.commit()
     db.refresh(propiedad)
 
-    valores_nuevos = {column.name: getattr(propietario_sociedad_propiedad, column.name) for column in propietario_sociedad_propiedad.__table__.columns}
+    valores_nuevos = {column.name: getattr(propietario_propiedad, column.name) for column in propietario_propiedad.__table__.columns}
 
     create_auditoria(
         db,
         "CREAR",
-        "propietario_sociedad_propiedad",
-        f"{propietario_id}_{sociedad_id}_{propiedad_id}",
+        "propietario_propiedad",
+        f"{propietario_id}_{propiedad_id}",
         user.username if user else None,
         None,
         valores_nuevos
@@ -116,26 +115,25 @@ def add_propietario_sociedad_to_propiedad(db: Session, propiedad_id: int, propie
 
     return propiedad
 
-def remove_propietario_sociedad_from_propiedad(db: Session, propiedad_id: int, propietario_id: int, sociedad_id: int, user: User = None):
+def remove_propietario_from_propiedad(db: Session, propiedad_id: int, propietario_id: int, user: User = None):
     propiedad = db.query(Propiedad).filter(Propiedad.id == propiedad_id).first()
-    propietario_sociedad_propiedad = db.query(PropietarioSociedadPropiedad).filter(
-        PropietarioSociedadPropiedad.propiedad_id == propiedad_id,
-        PropietarioSociedadPropiedad.propietario_id == propietario_id,
-        PropietarioSociedadPropiedad.sociedad_id == sociedad_id
+    propietario_propiedad = db.query(PropietarioPropiedad).filter(
+        PropietarioPropiedad.propiedad_id == propiedad_id,
+        PropietarioPropiedad.propietario_id == propietario_id
     ).first()
 
-    if propietario_sociedad_propiedad:
-        db.delete(propietario_sociedad_propiedad)
+    if propietario_propiedad:
+        db.delete(propietario_propiedad)
         db.commit()
         db.refresh(propiedad)
 
-        valores_anteriores = {column.name: getattr(propietario_sociedad_propiedad, column.name) for column in propietario_sociedad_propiedad.__table__.columns}
+        valores_anteriores = {column.name: getattr(propietario_propiedad, column.name) for column in propietario_propiedad.__table__.columns}
 
         create_auditoria(
             db,
             "ELIMINAR",
-            "propietario_sociedad_propiedad",
-            f"{propietario_id}_{sociedad_id}_{propiedad_id}",
+            "propietario_propiedad",
+            f"{propietario_id}_{propiedad_id}",
             user.username if user else None,
             valores_anteriores,
             None
@@ -292,7 +290,7 @@ def update_propiedad(db: Session, propiedad_id: int, propiedad: PropiedadCreate,
     return updated_propiedad
 
 def delete_propiedad(db: Session, propiedad_id: int, user: User = None):
-    db.query(PropietarioSociedadPropiedad).filter(PropietarioSociedadPropiedad.propiedad_id == propiedad_id).delete()
+    db.query(PropietarioPropiedad).filter(PropietarioPropiedad.propiedad_id == propiedad_id).delete()
     db.commit()
 
     propiedad = db.query(Propiedad).options(

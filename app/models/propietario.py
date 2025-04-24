@@ -12,4 +12,4 @@ class Propietario(Base):
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    propiedades = relationship("PropietarioSociedadPropiedad", back_populates="propietario")
+    propiedades = relationship("PropietarioPropiedad", back_populates="propietario")

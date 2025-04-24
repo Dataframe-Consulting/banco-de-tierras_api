@@ -4,20 +4,9 @@ from typing import List, Optional
 from .situacion_fisica import SituacionFisicaResponse
 from .vocacion import VocacionResponse
 from .vocacion_especifica import VocacionEspecificaResponse
-from .sociedad import SociedadResponse
 from .garantia import GarantiaResponse
 from .ubicacion import UbicacionResponse
 from .proceso_legal import ProcesoLegalResponse
-
-class SociedadPropiedadResponse(BaseModel):
-    id: int
-    sociedad_id: int
-    sociedad: SociedadResponse
-    propiedad_id: int
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class PropiedadSimpleResponse(BaseModel):
     id: int
@@ -30,7 +19,6 @@ class PropiedadSimpleResponse(BaseModel):
     adeudo_predial: Optional[float] = None
     anios_pend_predial: Optional[int] = None
     comentarios: Optional[str] = None
-    sociedades: List[SociedadPropiedadResponse] = []
     ubicaciones: List[UbicacionResponse] = []
     garantias: List[GarantiaResponse] = []
     procesos_legales: List[ProcesoLegalResponse] = []

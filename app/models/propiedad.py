@@ -3,18 +3,17 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, Float, Boolean, String, Text, TIMESTAMP, func, Table, ForeignKey
 from app.models.renta import propiedad_renta
 
-class PropietarioSociedadPropiedad(Base):
-    __tablename__ = "propietario_sociedad_propiedad"
+class PropietarioPropiedad(Base):
+    __tablename__ = "propietario_propiedad"
 
     es_socio = Column(Boolean, nullable=False)
+    sociedad_porcentaje_participacion = Column(Float, nullable=False)
     propietario_id = Column(Integer, ForeignKey("propietario.id", ondelete="CASCADE"), primary_key=True)
-    sociedad_id = Column(Integer, ForeignKey("sociedad.id", ondelete="CASCADE"), primary_key=True)
     propiedad_id = Column(Integer, ForeignKey("propiedad.id", ondelete="CASCADE"), primary_key=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
     propietario = relationship("Propietario", back_populates="propiedades")
-    sociedad = relationship("Sociedad", back_populates="propiedades")
-    propiedad = relationship("Propiedad", back_populates="propietarios_sociedades")
+    propiedad = relationship("Propiedad", back_populates="propietarios")
 
 ubicacion_propiedad = Table(
     "ubicacion_propiedad",
@@ -55,7 +54,7 @@ class Propiedad(Base):
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     proyecto = relationship("Proyecto", back_populates="propiedades")
-    propietarios_sociedades = relationship("PropietarioSociedadPropiedad", back_populates="propiedad")
+    propietarios = relationship("PropietarioPropiedad", back_populates="propiedad")
     ubicaciones = relationship("Ubicacion", secondary=ubicacion_propiedad, back_populates="propiedades")
     garantias = relationship("Garantia", secondary=garantia_propiedad, back_populates="propiedades")
     procesos_legales = relationship("ProcesoLegal", secondary=proceso_legal_propiedad, back_populates="propiedades")
