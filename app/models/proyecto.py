@@ -1,5 +1,5 @@
 from app.config.database import Base
-from sqlalchemy import Column, Integer, Float, Boolean, String, Text, TIMESTAMP, func, Table, ForeignKey
+from sqlalchemy import Column, Integer, Float, Boolean, String, Text, TIMESTAMP, func, ForeignKey
 from sqlalchemy.orm import relationship
 
 class Proyecto(Base):
