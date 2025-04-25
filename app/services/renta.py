@@ -11,7 +11,8 @@ from app.services.auditoria import create_auditoria
 def get_all_rentas_without_pagination(
     db: Session, 
     q: str = None, 
-    propiedad_id: int = None
+    propiedad_id: int = None,
+    proyecto_id: int = None,
 ):
     query = db.query(Renta)
 
@@ -23,6 +24,9 @@ def get_all_rentas_without_pagination(
 
     if propiedad_id:
         query = query.join(Renta.propiedades).filter(Propiedad.id == propiedad_id)
+
+    if proyecto_id:
+        query = query.filter(Renta.propiedades.any(Propiedad.proyecto_id == proyecto_id))
 
     return query.all()
 

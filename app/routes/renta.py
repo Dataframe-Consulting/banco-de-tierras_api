@@ -21,8 +21,9 @@ def get_rentas(
     db: Session = Depends(get_db), 
     q: Optional[str] = Query(None, description="Busca por nombre comercial o razon social..."),
     propiedad_id: Optional[int] = Query(None, description="Filtrar por ID de propiedad"),
+    proyecto_id: Optional[int] = Query(None, description="Filtrar por ID de proyecto"),
 ):
-    return get_all_rentas_without_pagination(db, q, propiedad_id)
+    return get_all_rentas_without_pagination(db, q, propiedad_id, proyecto_id)
 
 @router.get("/{renta_id}", response_model=RentaResponse)
 def get_renta(renta_id: int, db: Session = Depends(get_db)):
