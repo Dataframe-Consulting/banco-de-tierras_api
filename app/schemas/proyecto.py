@@ -7,6 +7,7 @@ from .vocacion_especifica import VocacionEspecificaResponse
 from .garantia import GarantiaResponse
 from .ubicacion import UbicacionResponse
 from .proceso_legal import ProcesoLegalResponse
+from .archivo import ArchivoResponse
 
 class PropiedadSimpleResponse(BaseModel):
     id: int
@@ -46,6 +47,7 @@ class ProyectoResponse(ProyectoBase):
     vocacion: VocacionResponse
     vocacion_especifica: VocacionEspecificaResponse
     propiedades: List[PropiedadSimpleResponse] = []
+    archivos: List[ArchivoResponse] = []
     created_at: datetime
     updated_at: datetime
 

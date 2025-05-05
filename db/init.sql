@@ -152,7 +152,7 @@ CREATE TABLE IF NOT EXISTS auditoria (
 CREATE TABLE IF NOT EXISTS archivo (
     id SERIAL PRIMARY KEY,
     url VARCHAR(255) NOT NULL,
-    tipo VARCHAR(50) NOT NULL,
+    proyecto_id INT REFERENCES proyecto(id) ON DELETE CASCADE,
     propiedad_id INT REFERENCES propiedad(id) ON DELETE CASCADE,
     propietario_id INT REFERENCES propietario(id) ON DELETE CASCADE,
     garantia_id INT REFERENCES garantia(id) ON DELETE CASCADE,

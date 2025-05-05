@@ -1,6 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel
 from typing import List
+from .archivo import ArchivoResponse
 
 class PropietarioBase(BaseModel):
     nombre: str
@@ -11,6 +12,7 @@ class PropietarioCreate(PropietarioBase):
 
 class PropietarioResponse(PropietarioBase):
     id: int
+    archivos: List[ArchivoResponse] = []
     created_at: datetime
     updated_at: datetime
 

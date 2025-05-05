@@ -6,6 +6,7 @@ from .propietario import PropietarioResponse
 from .garantia import GarantiaResponse
 from .ubicacion import UbicacionResponse
 from .proceso_legal import ProcesoLegalResponse
+from .archivo import ArchivoResponse
 
 class RentaSimpleResponse(BaseModel):
     id: int
@@ -69,6 +70,7 @@ class PropiedadResponse(PropiedadBase):
     garantias: List[GarantiaResponse] = []
     procesos_legales: List[ProcesoLegalResponse] = []
     rentas: List[RentaSimpleResponse] = []
+    archivos: List[ArchivoResponse] = []
     created_at: datetime
     updated_at: datetime
 

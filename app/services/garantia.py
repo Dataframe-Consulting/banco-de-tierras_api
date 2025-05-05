@@ -6,6 +6,7 @@ from app.models.user import User
 from app.models.garantia import Garantia
 from app.schemas.garantia import GarantiaCreate
 from app.services.auditoria import create_auditoria
+from app.models.archivo import Archivo
 
 def get_all_garantias_without_pagination(
     db: Session,
@@ -55,7 +56,6 @@ def create_garantia(db: Session, garantia: GarantiaCreate, user: User = None):
         None,
         valores_nuevos,
     )
-    print(auditoria)
     # Log the creation of the new garantia
 
     return new_garantia
@@ -82,12 +82,13 @@ def update_garantia(db: Session, garantia_id: int, garantia: GarantiaCreate, use
         valores_anteriores,
         valores_nuevos,
     )
-    print(auditoria)
     # Log the update of the garantia
 
     return updated_garantia
 
 def delete_garantia(db: Session, garantia_id: int, user: User = None):
+    db.query(Archivo).filter(Archivo.garantia_id == garantia_id).delete()
+
     garantia = db.query(Garantia).filter(Garantia.id == garantia_id).first()
     if garantia:
         # Log the deletion of the garantia
