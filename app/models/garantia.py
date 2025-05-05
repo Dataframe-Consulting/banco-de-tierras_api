@@ -15,3 +15,4 @@ class Garantia(Base):
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     propiedades = relationship("Propiedad", secondary=garantia_propiedad, back_populates="garantias")
+    archivos = relationship("Archivo", back_populates="garantia")

@@ -6,6 +6,7 @@ import math
 
 from app.models.user import User
 from app.services.auditoria import create_auditoria
+from app.models.archivo import Archivo
 
 def get_all_proyectos_without_pagination(
     db: Session,
@@ -140,7 +141,8 @@ def update_proyecto(db: Session, proyecto_id: int, proyecto: ProyectoCreate, use
     return updated_proyecto
 
 def delete_proyecto(db: Session, proyecto_id: int, user: User = None):
-    # db.commit()
+    db.query(Archivo).filter(Archivo.proyecto_id == proyecto_id).delete()
+
     proyecto = db.query(Proyecto).options(
         joinedload(Proyecto.situacion_fisica),
         joinedload(Proyecto.vocacion),

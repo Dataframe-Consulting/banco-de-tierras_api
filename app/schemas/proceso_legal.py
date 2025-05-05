@@ -1,6 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel
 from typing import List, Optional
+from .archivo import ArchivoResponse
 
 class ProcesoLegalBase(BaseModel):
     abogado: str
@@ -13,6 +14,7 @@ class ProcesoLegalCreate(ProcesoLegalBase):
 
 class ProcesoLegalResponse(ProcesoLegalBase):
     id: int
+    archivos: List[ArchivoResponse] = []
     created_at: datetime
     updated_at: datetime
 

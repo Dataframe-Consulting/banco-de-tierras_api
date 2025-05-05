@@ -6,6 +6,7 @@ from app.models.user import User
 from app.models.proceso_legal import ProcesoLegal
 from app.schemas.proceso_legal import ProcesoLegalCreate
 from app.services.auditoria import create_auditoria
+from app.models.archivo import Archivo
 
 def get_all_procesos_legales_without_pagination(
     db: Session,
@@ -79,6 +80,8 @@ def update_proceso_legal(db: Session, proceso_legal_id: int, proceso_legal: Proc
     return updated_proceso_legal
 
 def delete_proceso_legal(db: Session, proceso_legal_id: int, user: User = None):
+    db.query(Archivo).filter(Archivo.proceso_legal_id == proceso_legal_id).delete()
+
     proceso_legal = db.query(ProcesoLegal).filter(ProcesoLegal.id == proceso_legal_id).first()
     if proceso_legal:
         valores_anteriores = {column.name: getattr(proceso_legal, column.name) for column in proceso_legal.__table__.columns}

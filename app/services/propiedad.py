@@ -10,6 +10,7 @@ from app.models.ubicacion import Ubicacion
 from app.schemas.propiedad import PropiedadCreate
 from app.models.proceso_legal import ProcesoLegal
 from app.services.auditoria import create_auditoria
+from app.models.archivo import Archivo
 
 def get_all_propiedades_without_pagination(
     db: Session,
@@ -290,6 +291,9 @@ def update_propiedad(db: Session, propiedad_id: int, propiedad: PropiedadCreate,
     return updated_propiedad
 
 def delete_propiedad(db: Session, propiedad_id: int, user: User = None):
+    # Delete related file records first
+    db.query(Archivo).filter(Archivo.propiedad_id == propiedad_id).delete()
+    # Then delete the record itself
     db.query(PropietarioPropiedad).filter(PropietarioPropiedad.propiedad_id == propiedad_id).delete()
     db.commit()
 

@@ -1,6 +1,7 @@
 from typing import List
 from datetime import datetime
 from pydantic import BaseModel
+from .archivo import ArchivoResponse
 
 class GarantiBase(BaseModel):
     beneficiario: str
@@ -13,6 +14,7 @@ class GarantiaCreate(GarantiBase):
 
 class GarantiaResponse(GarantiBase):
     id: int
+    archivos: List[ArchivoResponse] = []
     created_at: datetime
     updated_at: datetime
 

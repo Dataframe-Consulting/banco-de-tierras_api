@@ -21,3 +21,4 @@ class Proyecto(Base):
     vocacion_especifica = relationship("VocacionEspecifica", back_populates="proyectos")
 
     propiedades = relationship("Propiedad", back_populates="proyecto")
+    archivos = relationship("Archivo", back_populates="proyecto")

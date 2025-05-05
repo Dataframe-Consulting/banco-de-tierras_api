@@ -59,3 +59,4 @@ class Propiedad(Base):
     garantias = relationship("Garantia", secondary=garantia_propiedad, back_populates="propiedades")
     procesos_legales = relationship("ProcesoLegal", secondary=proceso_legal_propiedad, back_populates="propiedades")
     rentas = relationship("Renta", secondary=propiedad_renta, back_populates="propiedades")
+    archivos = relationship("Archivo", back_populates="propiedad")

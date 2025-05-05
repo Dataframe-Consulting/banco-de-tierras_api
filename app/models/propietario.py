@@ -13,3 +13,4 @@ class Propietario(Base):
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     propiedades = relationship("PropietarioPropiedad", back_populates="propietario")
+    archivos = relationship("Archivo", back_populates="propietario")

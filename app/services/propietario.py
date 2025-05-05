@@ -6,6 +6,7 @@ from app.services.auditoria import create_auditoria
 
 from app.models.propietario import Propietario
 from app.schemas.propietario import PropietarioCreate
+from app.models.archivo import Archivo
 
 def get_all_propietarios_without_pagination(db: Session):
     return db.query(Propietario).all()
@@ -75,6 +76,8 @@ def update_propietario(db: Session, propietario_id: int, propietario: Propietari
     return updated_propietario
 
 def delete_propietario(db: Session, propietario_id: int, user: User = None):
+    db.query(Archivo).filter(Archivo.propietario_id == propietario_id).delete()
+
     propietario = db.query(Propietario).filter(Propietario.id == propietario_id).first()
     if propietario:
         valores_anteriores = {column.name: getattr(propietario, column.name) for column in propietario.__table__.columns}

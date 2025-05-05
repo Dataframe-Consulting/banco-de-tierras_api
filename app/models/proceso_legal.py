@@ -15,3 +15,4 @@ class ProcesoLegal(Base):
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     propiedades = relationship("Propiedad", secondary=proceso_legal_propiedad, back_populates="procesos_legales")
+    archivos = relationship("Archivo", back_populates="proceso_legal")
