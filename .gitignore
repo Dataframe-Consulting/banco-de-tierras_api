@@ -5,3 +5,5 @@ __pycache__/
 .env
 new_data_to_insert.sql
 .DS_Store
+
+.env.local
